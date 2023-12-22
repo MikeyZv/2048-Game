@@ -1,0 +1,105 @@
+h1 {
+    text-align: center;
+    font-size: 150px;
+    font-family: sans-serif;
+    margin: 20px;
+}
+
+#gameContainer {
+    text-align: center;
+}
+
+#gameBoard {
+    border: 3px solid;
+}
+
+#scoreContainer {
+    text-align: center;
+    height: 120px;
+}
+
+/*highScore*/
+#highScoreContainer {
+    background-color: white;
+    justify-content: center;
+    position: relative;
+    display: inline-block;
+    width: 150px;
+    height: 100px;
+    border: 3px solid;
+    vertical-align: middle;
+    top: 5%;
+    right: 95px;
+}
+
+#highScoreText {
+    position: relative;
+    font-size: 25px;
+    font-family: sans-serif;
+    height: 30px;
+    
+}
+
+#highScore {
+    position: relative;
+    font-size: 30px;
+    font-family: sans-serif;
+    height: 30px;
+    top: 15%;
+}
+
+/*playerScore*/
+#playerScoreContainer {
+    background-color: white;
+    justify-content: center;
+    position: relative; 
+    display: inline-block;
+    width: 150px;
+    height: 100px;
+    border: 3px solid;
+    vertical-align: middle;
+    top: 5%;
+    left: 95px;
+}
+
+#playerScoreText {
+    position: relative;
+    font-size: 25px;
+    font-family: sans-serif;
+    height: 30px;
+}
+
+#playerScore {
+    position: relative;
+    font-size: 30px;
+    font-family: sans-serif;
+    height: 30px;
+    top: 15%;
+    
+}
+
+/*footer*/
+a {
+    text-decoration: none;
+}
+
+.fa-linkedin {
+    position: relative;
+    right: 2%;
+    color: #0072b1;
+}
+
+.fa-envelope {
+    color: black;
+}
+
+.fa-github{
+    position: relative;
+    left: 2%;
+    color: #171515;
+}
+
+footer {
+    margin: 20px;
+    text-align: center;
+}
