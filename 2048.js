@@ -34,10 +34,10 @@ class Tile {
 
 window.addEventListener("keydown", moveBox);
 let tiles = [];
-let grid = [[{x:0, y:0, taken: 0}, {x:125, y:0, taken: 0}, {x:250, y:0, taken: 0}, {x:375, y:0, taken: 0}],
-            [{x:0, y:125, taken: 0}, {x:125, y:125, taken: 0}, {x:250, y:125, taken: 0}, {x:375, y:125, taken: 0}],
-            [{x:0, y:250, taken: 0}, {x:125, y:250, taken: 0}, {x:250, y:250, taken: 0}, {x:375, y:250, taken: 0}],
-            [{x:0, y:375, taken: 0}, {x:125, y:375, taken: 0}, {x:250, y:375, taken: 0}, {x:375, y:375, taken: 0}]];
+let grid = [[{x:0, y:0, taken: 0, value: 1}, {x:125, y:0, taken: 0, value: 1}, {x:250, y:0, taken: 0, value: 1}, {x:375, y:0, taken: 0, value: 1}],
+            [{x:0, y:125, taken: 0, value: 1}, {x:125, y:125, taken: 0, value: 1}, {x:250, y:125, taken: 0, value: 1}, {x:375, y:125, taken: 0, value: 1}],
+            [{x:0, y:250, taken: 0, value: 1}, {x:125, y:250, taken: 0, value: 1}, {x:250, y:250, taken: 0, value: 1}, {x:375, y:250, taken: 0, value: 1}],
+            [{x:0, y:375, taken: 0, value: 1}, {x:125, y:375, taken: 0, value: 1}, {x:250, y:375, taken: 0, value: 1}, {x:375, y:375, taken: 0, value: 1}]];
 
 randomStart();
 
@@ -54,8 +54,11 @@ function randomStart() {
         randomIndex1B = Math.floor(Math.random() * 4);
     }
 
-    const firstTile = new Tile(2, "red", grid[randomIndex1A][randomIndex1B].x, grid[randomIndex1A][randomIndex1B].y);
-    const secondTile = new Tile(2, "red", grid[randomIndex2A][randomIndex2B].x, grid[randomIndex2A][randomIndex2B].y);
+    const firstTile = new Tile(2, "Chartreuse", grid[randomIndex1A][randomIndex1B].x, grid[randomIndex1A][randomIndex1B].y);
+    const secondTile = new Tile(2, "Chartreuse", grid[randomIndex2A][randomIndex2B].x, grid[randomIndex2A][randomIndex2B].y);
+
+    grid[randomIndex1A][randomIndex1B].value = 2;
+    grid[randomIndex2A][randomIndex2B].value = 2;
 
     tiles.push(firstTile);
     tiles.push(secondTile);
@@ -77,6 +80,8 @@ function checkTaken () {
     }
 };
 
+
+
 //spawns in a random tile on an available space
 function randomNewTile() {
     randomIndexA = Math.floor(Math.random() * 4);
@@ -86,63 +91,10 @@ function randomNewTile() {
         randomIndexA = Math.floor(Math.random() * 4);
         randomIndexB = Math.floor(Math.random() * 4);
     }
-
-    let color;
-    let rand = Math.floor(Math.random() * 16);
-
-    switch(true) {
-        case(rand == 0):
-            color = "aqua";
-            break;
-        case(rand == 1):
-            color = "green";
-            break;
-        case(rand == 2):
-            color = "blue";
-            break;
-        case(rand == 3):
-            color = "purple";
-            break;
-        case(rand == 4):
-            color = "black";
-            break;
-        case(rand == 5):
-            color = "orange";
-            break;
-        case(rand == 6):
-            color = "yellow";
-            break;
-        case(rand == 7):
-            color = "coral";
-            break;
-        case(rand == 8):
-            color = "crimson";
-            break;
-        case(rand == 9):
-            color = "cyan";
-            break;
-        case(rand == 10):
-            color = "DarkRed";
-            break;
-        case(rand == 11):
-            color = "Gold";
-            break;
-        case(rand == 12):
-            color = "Indigo";
-            break;
-        case(rand == 13):
-            color = "LightGreen";
-            break;
-        case(rand == 14):
-            color = "Lime";
-            break;
-        case(rand == 15):
-            color = "Maroon";
-            break;
-    }
     
     if (tiles.length < 16) {
-        const newTile = new Tile(2, color, grid[randomIndexA][randomIndexB].x, grid[randomIndexA][randomIndexB].y);
+        const newTile = new Tile(2, "Chartreuse", grid[randomIndexA][randomIndexB].x, grid[randomIndexA][randomIndexB].y);
+        grid[randomIndexA][randomIndexB].value = 2;
         tiles.push(newTile);
     }
 };
@@ -154,9 +106,138 @@ function drawTiles() {
     }
 };
 
+function updateColors() {
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+            for (let k = 0; k < tiles.length; k++) {
+                if ((grid[i][j].x == tiles[k].x) && (grid[i][j].y == tiles[k].y)) {
+                    switch(true) {
+                        case(grid[i][j].value == 2):
+                            tiles[k].color = "Chartreuse";
+                            tiles[k].value = 2;
+                            break;
+                        case(grid[i][j].value == 4):
+                            tiles[k].color = "DarkGreen";
+                            tiles[k].value = 4;
+                            break;
+                        case(grid[i][j].value == 8):
+                            tiles[k].color = "Gold";
+                            tiles[k].value = 8;
+                            break;
+                        case(grid[i][j].value == 16):
+                            tiles[k].color = "DarkOrange";
+                            tiles[k].value = 16;
+                            break;
+                        case(grid[i][j].value == 32):
+                            tiles[k].color = "Red";
+                            tiles[k].value = 32;
+                            break;
+                        case(grid[i][j].value == 64):
+                            tiles[k].color = "DarkRed";
+                            tiles[k].value = 64;
+                            break;
+                        case(grid[i][j].value == 128):
+                            tiles[k].color = "Crimson";
+                            tiles[k].value = 128;
+                            break;
+                        case(grid[i][j].value == 256):
+                            tiles[k].color = "BlueViolet";
+                            tiles[k].value = 256;
+                            break;
+                        case(grid[i][j].value == 512):
+                            tiles[k].color = "DeepPink";
+                            tiles[k].value = 512;
+                            break;
+                    }
+                }
+            }
+        }
+    }
+};
+
+function mergeDownTiles() {
+    for (let i = 0; i < 4; i++) {
+        for (let j = 2; j > -1; j--) {
+            for (let k = 0; k < tiles.length; k++) {
+                if ((grid[j][i].x == tiles[k].x) && (grid[j][i].y == tiles[k].y)) {
+                    if (grid[j+1][i].taken == 1) {
+                        if (grid[j][i].value == grid[j+1][i].value) {
+                            tiles[k].clearTile();
+                            tiles.splice(k, 1);
+                            grid[j][i].taken = 0;
+                            grid[j+1][i].value *= 2;
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+function mergeUpTiles() {
+    for (let i = 0; i < 4; i++) {
+        for (let j = 1; j < 4; j++) {
+            for (let k = 0; k < tiles.length; k++) {
+                if ((grid[j][i].x == tiles[k].x) && (grid[j][i].y == tiles[k].y)) {
+                    if (grid[j-1][i].taken == 1) {
+                        if (grid[j][i].value == grid[j-1][i].value) {
+                            tiles[k].clearTile();
+                            tiles.splice(k, 1);
+                            grid[j][i].taken = 0;
+                            grid[j-1][i].value *= 2;
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+function mergeRightTiles() {
+    for (let i = 0; i < 4; i++) {
+        for (let j = 2; j > -1; j--) {
+            for (let k = 0; k < tiles.length; k++) {
+                if ((grid[i][j].x == tiles[k].x) && (grid[i][j].y == tiles[k].y)) {
+                    if (grid[i][j+1].taken == 1) {
+                        if (grid[i][j].value == grid[i][j+1].value) {
+                            tiles[k].clearTile();
+                            tiles.splice(k, 1);
+                            grid[i][j].taken = 0;
+                            grid[i][j+1].value *= 2;
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+function mergeLeftTiles() {
+    for (let i = 0; i < 4; i++) {
+        for (let j = 1; j < 4; j++) {
+            for (let k = 0; k < tiles.length; k++) {
+                if ((grid[i][j].x == tiles[k].x) && (grid[i][j].y == tiles[k].y)) {
+                    if (grid[i][j-1].taken == 1) {
+                        if (grid[i][j].value == grid[i][j-1].value) {
+                            tiles[k].clearTile();
+                            tiles.splice(k, 1);
+                            grid[i][j].taken = 0;
+                            grid[i][j-1].value *= 2;
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+//controls tile movements
 function moveDown() {
     for (let i = 0; i < 4; i++) {
-        for (let j = 3; j >= 0; j--) {
+        for (let j = 3; j > -1; j--) {
             for (let k = 0; k < tiles.length; k++) {
                 if ((grid[j][i].x == tiles[k].x) && (grid[j][i].y == tiles[k].y)) {
                     if (j == 2) {
@@ -166,6 +247,7 @@ function moveDown() {
                             tiles[k].y = grid[j+1][i].y;
                             grid[j][i].taken = 0;
                             grid[j+1][i].taken = 1;
+                            grid[j+1][i].value = grid[j][i].value;
                             tiles[k].drawTile();
                         }
                     } else if (j == 1) {
@@ -175,6 +257,7 @@ function moveDown() {
                             tiles[k].y = grid[j+2][i].y;
                             grid[j][i].taken = 0;
                             grid[j+2][i].taken = 1;
+                            grid[j+2][i].value = grid[j][i].value;
                             tiles[k].drawTile();
                         } else if (grid[j+1][i].taken == 0) {
                             tiles[k].clearTile();
@@ -182,6 +265,7 @@ function moveDown() {
                             tiles[k].y = grid[j+1][i].y;
                             grid[j][i].taken = 0;
                             grid[j+1][i].taken = 1;
+                            grid[j+1][i].value = grid[j][i].value;
                             tiles[k].drawTile();
                         } 
                     } else if (j == 0) {
@@ -191,6 +275,7 @@ function moveDown() {
                             tiles[k].y = grid[j+3][i].y;
                             grid[j][i].taken = 0;
                             grid[j+3][i].taken = 1;
+                            grid[j+3][i].value = grid[j][i].value;
                             tiles[k].drawTile();
                         } else if (grid[j+2][i].taken == 0) {
                             tiles[k].clearTile();
@@ -198,6 +283,7 @@ function moveDown() {
                             tiles[k].y = grid[j+2][i].y;
                             grid[j][i].taken = 0;
                             grid[j+2][i].taken = 1;
+                            grid[j+2][i].value = grid[j][i].value;
                             tiles[k].drawTile();
                         } else if (grid[j+1][i].taken == 0) {
                             tiles[k].clearTile();
@@ -205,6 +291,7 @@ function moveDown() {
                             tiles[k].y = grid[j+1][i].y;
                             grid[j][i].taken = 0;
                             grid[j+1][i].taken = 1;
+                            grid[j+1][i].value = grid[j][i].value;
                             tiles[k].drawTile();
                         } 
                     }
@@ -216,7 +303,7 @@ function moveDown() {
 
 function moveUp() {
     for (let i = 0; i < 4; i++) {
-        for (let j = 1; j <= 3; j++) {
+        for (let j = 1; j < 4; j++) {
             for (let k = 0; k < tiles.length; k++) {
                 if ((grid[j][i].x == tiles[k].x) && (grid[j][i].y == tiles[k].y)) {
                     if (j == 1) {
@@ -226,6 +313,7 @@ function moveUp() {
                             tiles[k].y = grid[j-1][i].y;
                             grid[j][i].taken = 0;
                             grid[j-1][i].taken = 1;
+                            grid[j-1][i].value = grid[j][i].value;
                             tiles[k].drawTile();
                         }
                     } else if (j == 2) {
@@ -235,6 +323,7 @@ function moveUp() {
                             tiles[k].y = grid[j-2][i].y;
                             grid[j][i].taken = 0;
                             grid[j-2][i].taken = 1;
+                            grid[j-2][i].value = grid[j][i].value;
                             tiles[k].drawTile();
                         } else if (grid[j-1][i].taken == 0) {
                             tiles[k].clearTile();
@@ -242,6 +331,7 @@ function moveUp() {
                             tiles[k].y = grid[j-1][i].y;
                             grid[j][i].taken = 0;
                             grid[j-1][i].taken = 1;
+                            grid[j-1][i].value = grid[j][i].value;
                             tiles[k].drawTile();
                         } 
                     } else if (j == 3) {
@@ -251,6 +341,7 @@ function moveUp() {
                             tiles[k].y = grid[j-3][i].y;
                             grid[j][i].taken = 0;
                             grid[j-3][i].taken = 1;
+                            grid[j-3][i].value = grid[j][i].value;
                             tiles[k].drawTile();
                         } else if (grid[j-2][i].taken == 0) {
                             tiles[k].clearTile();
@@ -258,6 +349,7 @@ function moveUp() {
                             tiles[k].y = grid[j-2][i].y;
                             grid[j][i].taken = 0;
                             grid[j-2][i].taken = 1;
+                            grid[j-2][i].value = grid[j][i].value;
                             tiles[k].drawTile();
                         } else if (grid[j-1][i].taken == 0) {
                             tiles[k].clearTile();
@@ -265,6 +357,7 @@ function moveUp() {
                             tiles[k].y = grid[j-1][i].y;
                             grid[j][i].taken = 0;
                             grid[j-1][i].taken = 1;
+                            grid[j-1][i].value = grid[j][i].value;
                             tiles[k].drawTile();
                         } 
                     }
@@ -276,7 +369,7 @@ function moveUp() {
 
 function moveLeft() {
     for (let i = 0; i < 4; i++) {
-        for (let j = 1; j <= 3; j++) {
+        for (let j = 1; j < 4; j++) {
             for (let k = 0; k < tiles.length; k++) {
                 if ((grid[i][j].x == tiles[k].x) && (grid[i][j].y == tiles[k].y)) {
                     if (j == 1) {
@@ -286,6 +379,7 @@ function moveLeft() {
                             tiles[k].y = grid[i][j-1].y;
                             grid[i][j].taken = 0;
                             grid[i][j-1].taken = 1;
+                            grid[i][j-1].value = grid[i][j].value;
                             tiles[k].drawTile();
                         }
                     } else if (j == 2) {
@@ -295,6 +389,7 @@ function moveLeft() {
                             tiles[k].y = grid[i][j-2].y;
                             grid[i][j].taken = 0;
                             grid[i][j-2].taken = 1;
+                            grid[i][j-2].value = grid[i][j].value;
                             tiles[k].drawTile();
                         } else if (grid[i][j-1].taken == 0) {
                             tiles[k].clearTile();
@@ -302,6 +397,7 @@ function moveLeft() {
                             tiles[k].y = grid[i][j-1].y;
                             grid[i][j].taken = 0;
                             grid[i][j-1].taken = 1;
+                            grid[i][j-1].value = grid[i][j].value;
                             tiles[k].drawTile();
                         }
                     } else if (j == 3) {
@@ -311,6 +407,7 @@ function moveLeft() {
                             tiles[k].y = grid[i][j-3].y;
                             grid[i][j].taken = 0;
                             grid[i][j-3].taken = 1;
+                            grid[i][j-3].value = grid[i][j].value;
                             tiles[k].drawTile();
                         } else if (grid[i][j-2].taken == 0) {
                             tiles[k].clearTile();
@@ -318,6 +415,7 @@ function moveLeft() {
                             tiles[k].y = grid[i][j-2].y;
                             grid[i][j].taken = 0;
                             grid[i][j-2].taken = 1;
+                            grid[i][j-2].value = grid[i][j].value;
                             tiles[k].drawTile();
                         } else if (grid[i][j-1].taken == 0) {
                             tiles[k].clearTile();
@@ -325,6 +423,7 @@ function moveLeft() {
                             tiles[k].y = grid[i][j-1].y;
                             grid[i][j].taken = 0;
                             grid[i][j-1].taken = 1;
+                            grid[i][j-1].value = grid[i][j].value;
                             tiles[k].drawTile();
                         }
                     }
@@ -336,7 +435,7 @@ function moveLeft() {
 
 function moveRight() {
     for (let i = 0; i < 4; i++) {
-        for (let j = 3; j >= 0; j--) {
+        for (let j = 3; j > -1; j--) {
             for (let k = 0; k < tiles.length; k++) {
                 if ((grid[i][j].x == tiles[k].x) && (grid[i][j].y == tiles[k].y)) {
                     if (j == 2) {
@@ -346,6 +445,7 @@ function moveRight() {
                             tiles[k].y = grid[i][j+1].y;
                             grid[i][j].taken = 0;
                             grid[i][j+1].taken = 1;
+                            grid[i][j+1].value = grid[i][j].value;
                             tiles[k].drawTile();
                         }
                     } else if (j == 1) {
@@ -355,6 +455,7 @@ function moveRight() {
                             tiles[k].y = grid[i][j+2].y;
                             grid[i][j].taken = 0;
                             grid[i][j+2].taken = 1;
+                            grid[i][j+2].value = grid[i][j].value;
                             tiles[k].drawTile();
                         } else if (grid[i][j+1].taken == 0) {
                             tiles[k].clearTile();
@@ -362,6 +463,7 @@ function moveRight() {
                             tiles[k].y = grid[i][j+1].y;
                             grid[i][j].taken = 0;
                             grid[i][j+1].taken = 1;
+                            grid[i][j+1].value = grid[i][j].value;
                             tiles[k].drawTile();
                         }
                     } else if (j == 0) {
@@ -371,6 +473,7 @@ function moveRight() {
                             tiles[k].y = grid[i][j+3].y;
                             grid[i][j].taken = 0;
                             grid[i][j+3].taken = 1;
+                            grid[i][j+3].value = grid[i][j].value;
                             tiles[k].drawTile();
                         } else if (grid[i][j+2].taken == 0) {
                             tiles[k].clearTile();
@@ -378,6 +481,7 @@ function moveRight() {
                             tiles[k].y = grid[i][j+2].y;
                             grid[i][j].taken = 0;
                             grid[i][j+2].taken = 1;
+                            grid[i][j+2].value = grid[i][j].value;
                             tiles[k].drawTile();
                         } else if (grid[i][j+1].taken == 0) {
                             tiles[k].clearTile();
@@ -385,6 +489,7 @@ function moveRight() {
                             tiles[k].y = grid[i][j+1].y;
                             grid[i][j].taken = 0;
                             grid[i][j+1].taken = 1;
+                            grid[i][j+1].value = grid[i][j].value;
                             tiles[k].drawTile();
                         }
                     }
@@ -409,24 +514,36 @@ function moveBox(event) {
         case(keyPressed == downArrow || keyPressed == downS):
             checkTaken();
             moveDown();
+            mergeDownTiles();
+            moveDown();
+            updateColors();
             randomNewTile();
             drawTiles();
             break;
         case(keyPressed == upArrow || keyPressed == upW):
             checkTaken();
             moveUp();
+            mergeUpTiles();
+            moveUp();
+            updateColors();
             randomNewTile();
             drawTiles();
             break;
         case(keyPressed == rightArrow || keyPressed == rightD):
             checkTaken();
             moveRight();
+            mergeRightTiles();
+            moveRight();
+            updateColors();
             randomNewTile();
             drawTiles();
             break;
         case(keyPressed == leftArrow || keyPressed == leftA):
             checkTaken();
             moveLeft();
+            mergeLeftTiles();
+            moveLeft();
+            updateColors();
             randomNewTile();
             drawTiles();
             break;
