@@ -38,7 +38,9 @@ let grid = [[{x:0, y:0, taken: 0, value: 1}, {x:125, y:0, taken: 0, value: 1}, {
             [{x:0, y:125, taken: 0, value: 1}, {x:125, y:125, taken: 0, value: 1}, {x:250, y:125, taken: 0, value: 1}, {x:375, y:125, taken: 0, value: 1}],
             [{x:0, y:250, taken: 0, value: 1}, {x:125, y:250, taken: 0, value: 1}, {x:250, y:250, taken: 0, value: 1}, {x:375, y:250, taken: 0, value: 1}],
             [{x:0, y:375, taken: 0, value: 1}, {x:125, y:375, taken: 0, value: 1}, {x:250, y:375, taken: 0, value: 1}, {x:375, y:375, taken: 0, value: 1}]];
-
+let mergePossible;
+let gameOver = false;
+let canMove = true;
 randomStart();
 
 //randomly places two tiles on the board at the beginning of the game but they can't overlap
@@ -80,19 +82,208 @@ function checkTaken () {
     }
 };
 
+function checkGame() {
+    if (mergePossible == false && (tiles.length == 16)) {
+        gameOver = true;
+    } else {
+        randomNewTile();
+    }
+};
 
+//draws GAME OVER text if the game is over
+function checkGameOver() {
+    if (gameOver) {
+        ctx.font = "70px sans-serif";
+        ctx.fillStyle = "black";
+        ctx.textAlign = "center";
+        ctx.fillText("GAME OVER", gameWidth / 2, gameHeight / 2);
+        ctx.font = "25px sans-serif";
+        ctx.fillText("PRESS 'SPACE' TO RESTART", gameWidth / 2, gameHeight - 200);
+    }
+};
+
+//checks all tiles to see if there is one tile with the same value adjacent to it
+function checkSurroundingTiles() {
+    //top to bottom
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 4; j++) {
+            if (i == 0) {
+                if (grid[i+1][j].taken == 1) {
+                    if (grid[i][j].value == grid[i+1][j].value) {
+                        mergePossible = true;
+                    }
+                } else if (grid[i+2][j].taken == 1) {
+                    if (grid[i][j].value == grid[i+2][j].value) {
+                        mergePossible = true;
+                    }
+                } else if (grid[i+3][j].taken == 1) {
+                    if (grid[i][j].value == grid[i+3][j].value) {
+                        mergePossible = true;
+                    }
+                } else {
+                    mergePossible = false;
+                }
+            } else if (i == 1) {
+                if (grid[i+1][j].taken == 1) {
+                    if (grid[i][j].value == grid[i+1][j].value) {
+                        mergePossible = true;
+                    }
+                } else if (grid[i+2][j].taken == 1) {
+                    if (grid[i][j].value == grid[i+2][j].value) {
+                        mergePossible = true;
+                    }
+                } else { 
+                    mergePossible = false;
+                }
+            } else if (i == 2) {
+                if (grid[i+1][j].taken == 1) {
+                    if (grid[i][j].value == grid[i+1][j].value) {
+                        mergePossible = true;
+                    } 
+                } else {
+                    mergePossible = false;
+                }
+            }
+        }
+    }
+    //bottom to top
+    for (let i = 3; i > 0; i--) {
+        for (let j = 0; j < 4; j++) {
+            if (i == 3) {
+                if (grid[i-1][j].taken == 1) {
+                    if (grid[i][j].value == grid[i-1][j].value) {
+                        mergePossible = true;
+                    }
+                } else if (grid[i-2][j].taken == 1) {
+                    if (grid[i][j].value == grid[i-2][j].value) {
+                        mergePossible = true;
+                    }
+                } else if (grid[i-3][j].taken == 1) {
+                    if (grid[i][j].value == grid[i-3][j].value) {
+                        mergePossible = true;
+                    }
+                } else {
+                    mergePossible = false;
+                }
+            } else if (i == 2) {
+                if (grid[i-1][j].taken == 1) {
+                    if (grid[i][j].value == grid[i-1][j].value) {
+                        mergePossible = true;
+                    }
+                } else if (grid[i-2][j].taken == 1) {
+                    if (grid[i][j].value == grid[i-2][j].value) {
+                        mergePossible = true;
+                    }
+                } else { 
+                    mergePossible = false;
+                }
+            } else if (i == 1) {
+                if (grid[i-1][j].taken == 1) {
+                    if (grid[i][j].value == grid[i-1][j].value) {
+                        mergePossible = true;
+                    } 
+                } else {
+                    mergePossible = false;
+                }
+            }
+        }
+    }
+    //left to right
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 3; j++) {
+            if (j == 0) {
+                if (grid[i][j+1].taken == 1) {
+                    if (grid[i][j].value == grid[i][j+1].value) {
+                        mergePossible = true;
+                    }
+                } else if (grid[i][j+2].taken == 1) {
+                    if (grid[i][j].value == grid[i][j+2].value) {
+                        mergePossible = true;
+                    }
+                } else if (grid[i][j+3].taken == 1) {
+                    if (grid[i][j].value == grid[i][j+3].value) {
+                        mergePossible = true;
+                    }
+                } else {
+                    mergePossible = false;
+                }
+            } else if (j == 1) {
+                if (grid[i][j+1].taken == 1) {
+                    if (grid[i][j].value == grid[i][j+1].value) {
+                        mergePossible = true;
+                    }
+                } else if (grid[i][j+2].taken == 1) {
+                    if (grid[i][j].value == grid[i][j+2].value) {
+                        mergePossible = true;
+                    }
+                } else {
+                    mergePossible = false;
+                }
+            } else if (j == 2) {
+                if (grid[i][j+1].taken == 1) {
+                    if (grid[i][j].value == grid[i][j+1].value) {
+                        mergePossible = true;
+                    }
+                } else {
+                    mergePossible = false;
+                }
+            }
+        }
+    }
+    //right to left
+    for (let i = 0; i < 4; i++) {
+        for (let j = 3; j > 0; j--) {
+            if (j == 3) {
+                if (grid[i][j-1].taken == 1) {
+                    if (grid[i][j].value == grid[i][j-1].value) {
+                        mergePossible = true;
+                    }
+                } else if (grid[i][j-2].taken == 1) {
+                    if (grid[i][j].value == grid[i][j-2].value) {
+                        mergePossible = true;
+                    }
+                } else if (grid[i][j-3].taken == 1) {
+                    if (grid[i][j].value == grid[i][j-3].value) {
+                        mergePossible = true;
+                    }
+                } else {
+                    mergePossible = false;
+                }
+            } else if (j == 2) {
+                if (grid[i][j-1].taken == 1) {
+                    if (grid[i][j].value == grid[i][j-1].value) {
+                        mergePossible = true;
+                    }
+                } else if (grid[i][j-2].taken == 1) {
+                    if (grid[i][j].value == grid[i][j-2].value) {
+                        mergePossible = true;
+                    }
+                } else {
+                    mergePossible = false;
+                }
+            } else if (j == 1) {
+                if (grid[i][j-1].taken == 1) {
+                    if (grid[i][j].value == grid[i][j-1].value) {
+                        mergePossible = true;
+                    }
+                } else {
+                    mergePossible = false;
+                }
+            }
+        }
+    }
+};
 
 //spawns in a random tile on an available space
 function randomNewTile() {
     randomIndexA = Math.floor(Math.random() * 4);
     randomIndexB = Math.floor(Math.random() * 4);
-
-    while (grid[randomIndexA][randomIndexB].taken == 1) {
-        randomIndexA = Math.floor(Math.random() * 4);
-        randomIndexB = Math.floor(Math.random() * 4);
-    }
     
     if (tiles.length < 16) {
+        while (grid[randomIndexA][randomIndexB].taken == 1) {
+            randomIndexA = Math.floor(Math.random() * 4);
+            randomIndexB = Math.floor(Math.random() * 4);
+        }
         const newTile = new Tile(2, "Chartreuse", grid[randomIndexA][randomIndexB].x, grid[randomIndexA][randomIndexB].y);
         grid[randomIndexA][randomIndexB].value = 2;
         tiles.push(newTile);
@@ -166,7 +357,6 @@ function mergeDownTiles() {
                             tiles.splice(k, 1);
                             grid[j][i].taken = 0;
                             grid[j+1][i].value *= 2;
-
                         }
                     }
                 }
@@ -186,7 +376,6 @@ function mergeUpTiles() {
                             tiles.splice(k, 1);
                             grid[j][i].taken = 0;
                             grid[j-1][i].value *= 2;
-
                         }
                     }
                 }
@@ -206,8 +395,7 @@ function mergeRightTiles() {
                             tiles.splice(k, 1);
                             grid[i][j].taken = 0;
                             grid[i][j+1].value *= 2;
-
-                        }
+                        } 
                     }
                 }
             }
@@ -226,7 +414,7 @@ function mergeLeftTiles() {
                             tiles.splice(k, 1);
                             grid[i][j].taken = 0;
                             grid[i][j-1].value *= 2;
-                        }
+                        } 
                     }
                 }
             }
@@ -249,6 +437,7 @@ function moveDown() {
                             grid[j+1][i].taken = 1;
                             grid[j+1][i].value = grid[j][i].value;
                             tiles[k].drawTile();
+                            canMove = true;
                         }
                     } else if (j == 1) {
                         if (grid[j+2][i].taken == 0) {
@@ -259,6 +448,7 @@ function moveDown() {
                             grid[j+2][i].taken = 1;
                             grid[j+2][i].value = grid[j][i].value;
                             tiles[k].drawTile();
+                            canMove = true;
                         } else if (grid[j+1][i].taken == 0) {
                             tiles[k].clearTile();
                             tiles[k].x = grid[j+1][i].x;
@@ -267,6 +457,7 @@ function moveDown() {
                             grid[j+1][i].taken = 1;
                             grid[j+1][i].value = grid[j][i].value;
                             tiles[k].drawTile();
+                            canMove = true;
                         } 
                     } else if (j == 0) {
                         if (grid[j+3][i].taken == 0) {
@@ -277,6 +468,7 @@ function moveDown() {
                             grid[j+3][i].taken = 1;
                             grid[j+3][i].value = grid[j][i].value;
                             tiles[k].drawTile();
+                            canMove = true;
                         } else if (grid[j+2][i].taken == 0) {
                             tiles[k].clearTile();
                             tiles[k].x = grid[j+2][i].x;
@@ -285,6 +477,7 @@ function moveDown() {
                             grid[j+2][i].taken = 1;
                             grid[j+2][i].value = grid[j][i].value;
                             tiles[k].drawTile();
+                            canMove = true;
                         } else if (grid[j+1][i].taken == 0) {
                             tiles[k].clearTile();
                             tiles[k].x = grid[j+1][i].x;
@@ -293,6 +486,7 @@ function moveDown() {
                             grid[j+1][i].taken = 1;
                             grid[j+1][i].value = grid[j][i].value;
                             tiles[k].drawTile();
+                            canMove = true;
                         } 
                     }
                 }
@@ -517,8 +711,10 @@ function moveBox(event) {
             mergeDownTiles();
             moveDown();
             updateColors();
-            randomNewTile();
+            checkSurroundingTiles()
+            checkGame();
             drawTiles();
+            checkGameOver();
             break;
         case(keyPressed == upArrow || keyPressed == upW):
             checkTaken();
@@ -526,8 +722,10 @@ function moveBox(event) {
             mergeUpTiles();
             moveUp();
             updateColors();
-            randomNewTile();
+            checkSurroundingTiles()
+            checkGame();
             drawTiles();
+            checkGameOver();
             break;
         case(keyPressed == rightArrow || keyPressed == rightD):
             checkTaken();
@@ -535,8 +733,10 @@ function moveBox(event) {
             mergeRightTiles();
             moveRight();
             updateColors();
-            randomNewTile();
+            checkSurroundingTiles()
+            checkGame();
             drawTiles();
+            checkGameOver();
             break;
         case(keyPressed == leftArrow || keyPressed == leftA):
             checkTaken();
@@ -544,8 +744,10 @@ function moveBox(event) {
             mergeLeftTiles();
             moveLeft();
             updateColors();
-            randomNewTile();
+            checkSurroundingTiles()
+            checkGame();
             drawTiles();
+            checkGameOver();
             break;
         }
 
