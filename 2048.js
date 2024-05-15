@@ -1,6 +1,6 @@
 const gameBoard = document.querySelector("#gameBoard");
 const ctx = gameBoard.getContext("2d");
-const highScore = document.querySelector("#highScore");
+const playerhighScore = document.querySelector("#highScore");
 const playerScore = document.querySelector("#playerScore");
 const gameWidth =  gameBoard.width;
 const gameHeight = gameBoard.height;
@@ -32,10 +32,10 @@ class Tile {
     }
 
     drawValue() {
-        ctx.font = "20px Courier, monospace";
+        ctx.font = "550 25px Courier, monospace";
         ctx.fillStyle = "black";
         ctx.textAlign = "center";
-        ctx.fillText(this.value, this.x + 62.6, this.y + 62.5);
+        ctx.fillText(this.value, this.x + 62.5, this.y + 75);
     }
     
 };
@@ -59,6 +59,7 @@ let mergePossible;
 let tileMoved = false;
 let tileMerged = false;
 let score = 0;
+let highScore = 0;
 randomStart();
 
 //randomly places two tiles on the board at the beginning of the game but they can't overlap
@@ -119,6 +120,7 @@ function checkGameOver() {
     }
 }
 
+//test function
 function test() {
     if (!mergePossible) {
         ctx.font = "30px Courier, monospace";
@@ -362,6 +364,17 @@ function updateScore() {
     playerScore.textContent = score;
 };
 
+function updateHighScore() {
+    playerhighScore.textContent = highScore;
+};
+
+function checkHighScore() {
+    if (score >= highScore) {
+        highScore = score;
+        playerhighScore.textContent = score;
+    }
+}; 
+
 function restartGame() {
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, gameWidth, gameHeight);
@@ -373,11 +386,13 @@ function restartGame() {
     mergePossible = false;
     tileMoved = false;
     tileMerged = false;
+    checkHighScore();
     score = 0;
     updateScore();
     randomStart();
 };
 
+//merges tiles if possible
 function mergeDownTiles() {
     for (let i = 0; i < 4; i++) {
         for (let j = 2; j > -1; j--) {
@@ -466,7 +481,7 @@ function mergeLeftTiles() {
     }
 };
 
-//controls tile movements
+//moves tiles
 function moveDown() {
     for (let i = 0; i < 4; i++) {
         for (let j = 2; j > -1; j--) {
@@ -803,6 +818,7 @@ function moveRight() {
     }
 };
 
+//test function
 function color1() {
     for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
@@ -816,6 +832,7 @@ function color1() {
     }
 }
 
+//controls
 function moveBox(event) {
     const keyPressed = event.keyCode;
     const upArrow = 38;
@@ -839,6 +856,7 @@ function moveBox(event) {
             checkSurroundingTiles()
             drawTiles();
             updateScore();
+            checkHighScore();
             checkGameOver();
             /*
             test();
@@ -857,6 +875,7 @@ function moveBox(event) {
             checkSurroundingTiles()
             drawTiles();
             updateScore();
+            checkHighScore();
             checkGameOver();
             /*
             test();
@@ -875,6 +894,7 @@ function moveBox(event) {
             checkSurroundingTiles();
             drawTiles();
             updateScore();
+            checkHighScore();
             checkGameOver();
             /*
             test();
@@ -893,6 +913,7 @@ function moveBox(event) {
             checkSurroundingTiles();
             drawTiles();
             updateScore();
+            checkHighScore();
             checkGameOver();
             /*
             test();
