@@ -288,8 +288,16 @@ function randomNewTile() {
             randomIndexA = Math.floor(Math.random() * 4);
             randomIndexB = Math.floor(Math.random() * 4);
         }
-        const newTile = new Tile(2, "Chartreuse", grid[randomIndexA][randomIndexB].x, grid[randomIndexA][randomIndexB].y);
-        grid[randomIndexA][randomIndexB].value = 2;
+        chance = Math.floor(Math.random() * 10);
+        if (chance == 0) {
+            tileValue = 4;
+            tileColor = "LimeGreen";
+        } else {
+            tileValue = 2;
+            tileColor = "Chartreuse";
+        }
+        const newTile = new Tile(tileValue, tileColor, grid[randomIndexA][randomIndexB].x, grid[randomIndexA][randomIndexB].y);
+        grid[randomIndexA][randomIndexB].value = tileValue;
         grid[randomIndexA][randomIndexB].taken = 1;
         tiles.push(newTile);
     }
