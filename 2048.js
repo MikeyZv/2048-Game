@@ -503,12 +503,12 @@ function moveDownAnimation(x, y, index) {
     clearInterval(id);
     id = setInterval(frame, 4);
     function frame() {
-        if (tiles[index].y >= y) {
+        if (tiles[index].y == y) {
             clearInterval(id);
         } else {
             tiles[index].clearTile();
             tiles[index].x = x;
-            tiles[index].y += 31.25;
+            tiles[index].y += 25;
             tiles[index].drawTile();
             tiles[index].drawValue();
         }
@@ -520,12 +520,12 @@ function moveUpAnimation(x, y, index) {
     clearInterval(id);
     id = setInterval(frame, 4);
     function frame() {
-        if (tiles[index].y <= y) {
+        if (tiles[index].y == y) {
             clearInterval(id);
         } else {
             tiles[index].clearTile();
             tiles[index].x = x;
-            tiles[index].y -= 31.25;
+            tiles[index].y -= 25;
             tiles[index].drawTile();
             tiles[index].drawValue();
         }
@@ -537,11 +537,11 @@ function moveLeftAnimation(x, y, index) {
     clearInterval(id);
     id = setInterval(frame, 4);
     function frame() {
-        if (tiles[index].x <= x) {
+        if (tiles[index].x == x) {
             clearInterval(id);
         } else {
             tiles[index].clearTile();
-            tiles[index].x -= 31.25;
+            tiles[index].x -= 25;
             tiles[index].y = y;
             tiles[index].drawTile();
             tiles[index].drawValue();
@@ -554,11 +554,11 @@ function moveRightAnimation(x, y, index) {
     clearInterval(id);
     id = setInterval(frame, 4);
     function frame() {
-        if (tiles[index].x >= x) {
+        if (tiles[index].x == x) {
             clearInterval(id);
         } else {
             tiles[index].clearTile();
-            tiles[index].x += 31.25;
+            tiles[index].x += 25;
             tiles[index].y = y;
             tiles[index].drawTile();
             tiles[index].drawValue();
@@ -575,87 +575,55 @@ function moveDown() {
                 if ((grid[j][i].x == tiles[k].x) && (grid[j][i].y == tiles[k].y)) { //if grid coordinates equal tile coordinates
                     if (j == 2) { //row 2
                         if (grid[j+1][i].taken == 0) { //if gridbox in row 3 is free
-                            // tiles[k].clearTile(); //clears drawing of tile in current gridbox
-                            // //new tile coordinates
-                            // tiles[k].x = grid[j+1][i].x;
-                            // tiles[k].y = grid[j+1][i].y;
-                            //grid[j][i].taken = 0; //current gridbox is now free
                             grid[j+1][i].taken = grid[j][i].taken; //gridbox in row 3 is now taken
                             grid[j][i].taken = 0;
                             grid[j+1][i].value = grid[j][i].value; //updates gridbox value in row 3 with current gridbox value
                             grid[j][i].value = 1; //sets current gridbox value back to 1
                             moveDownAnimation(grid[j+1][i].x, grid[j+1][i].y, k);
-                            // tiles[k].drawTile(); //draws tile in new gridbox
-                            // tiles[k].drawValue(); //draws value in new gridbox
                             tiles[k].clearTile();
                             tileMoved = true; //tile successfully moved
                         }
                     } else if (j == 1) { //row 1
                         if (grid[j+2][i].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[j+2][i].x;
-                            // tiles[k].y = grid[j+2][i].y;
                             grid[j+2][i].taken = grid[j][i].taken;
                             grid[j][i].taken = 0;
                             grid[j+2][i].value = grid[j][i].value;
                             grid[j][i].value = 1;
                             moveDownAnimation(grid[j+2][i].x, grid[j+2][i].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         } else if (grid[j+1][i].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[j+1][i].x;
-                            // tiles[k].y = grid[j+1][i].y;
                             grid[j+1][i].taken = grid[j][i].taken;
                             grid[j][i].taken = 0;
                             grid[j+1][i].value = grid[j][i].value;
                             grid[j][i].value = 1;
                             moveDownAnimation(grid[j+1][i].x, grid[j+1][i].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         }
                     } else if (j == 0) { //row 0
                         if (grid[j+3][i].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[j+3][i].x;
-                            // tiles[k].y = grid[j+3][i].y;
                             grid[j+3][i].taken = grid[j][i].taken;
                             grid[j][i].taken = 0;
                             grid[j+3][i].value = grid[j][i].value;
                             grid[j][i].value = 1;
                             moveDownAnimation(grid[j+3][i].x, grid[j+3][i].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         } else if (grid[j+2][i].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[j+2][i].x;
-                            // tiles[k].y = grid[j+2][i].y;
                             grid[j+2][i].taken = grid[j][i].taken;
                             grid[j][i].taken = 0;
                             grid[j+2][i].value = grid[j][i].value;
                             grid[j][i].value = 1;
                             moveDownAnimation(grid[j+2][i].x, grid[j+2][i].y, k); 
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         } else if (grid[j+1][i].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[j+1][i].x;
-                            // tiles[k].y = grid[j+1][i].y;
                             grid[j+1][i].taken = grid[j][i].taken;
                             grid[j][i].taken = 0;
                             grid[j+1][i].value = grid[j][i].value;
                             grid[j][i].value = 1;
-                            moveDownAnimation(grid[j+1][i].x, grid[j+1][i].y, k); 
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
+                            moveDownAnimation(grid[j+1][i].x, grid[j+1][i].y, k);
                             tiles[k].clearTile();
                             tileMoved = true;
                         }
@@ -673,85 +641,55 @@ function moveUp() {
                 if ((grid[j][i].x == tiles[k].x) && (grid[j][i].y == tiles[k].y)) {
                     if (j == 1) {
                         if (grid[j-1][i].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[j-1][i].x;
-                            // tiles[k].y = grid[j-1][i].y;
                             grid[j-1][i].taken = grid[j][i].taken;
                             grid[j][i].taken = 0;
                             grid[j-1][i].value = grid[j][i].value;
                             grid[j][i].value = 1;
                             moveUpAnimation(grid[j-1][i].x, grid[j-1][i].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         }
                     } else if (j == 2) {
                         if (grid[j-2][i].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[j-2][i].x;
-                            // tiles[k].y = grid[j-2][i].y;
                             grid[j-2][i].taken = grid[j][i].taken;
                             grid[j][i].taken = 0;
                             grid[j-2][i].value = grid[j][i].value;
                             grid[j][i].value = 1;
                             moveUpAnimation(grid[j-2][i].x, grid[j-2][i].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         } else if (grid[j-1][i].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[j-1][i].x;
-                            // tiles[k].y = grid[j-1][i].y;
                             grid[j-1][i].taken = grid[j][i].taken;
                             grid[j][i].taken = 0;
                             grid[j-1][i].value = grid[j][i].value;
                             grid[j][i].value = 1;
                             moveUpAnimation(grid[j-1][i].x, grid[j-1][i].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         }
                     } else if (j == 3) {
                         if (grid[j-3][i].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[j-3][i].x;
-                            // tiles[k].y = grid[j-3][i].y;
                             grid[j-3][i].taken = grid[j][i].taken;
                             grid[j][i].taken = 0;
                             grid[j-3][i].value = grid[j][i].value;
                             grid[j][i].value = 1;
                             moveUpAnimation(grid[j-3][i].x, grid[j-3][i].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         } else if (grid[j-2][i].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[j-2][i].x;
-                            // tiles[k].y = grid[j-2][i].y;
                             grid[j-2][i].taken = grid[j][i].taken;
                             grid[j][i].taken = 0;
                             grid[j-2][i].value = grid[j][i].value;
                             grid[j][i].value = 1;
                             moveUpAnimation(grid[j-2][i].x, grid[j-2][i].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         } else if (grid[j-1][i].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[j-1][i].x;
-                            // tiles[k].y = grid[j-1][i].y;
                             grid[j-1][i].taken = grid[j][i].taken;
                             grid[j][i].taken = 0;
                             grid[j-1][i].value = grid[j][i].value;
                             grid[j][i].value = 1;
                             moveUpAnimation(grid[j-1][i].x, grid[j-1][i].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         }
@@ -769,85 +707,55 @@ function moveLeft() {
                 if ((grid[i][j].x == tiles[k].x) && (grid[i][j].y == tiles[k].y)) {
                     if (j == 1) {
                         if (grid[i][j-1].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[i][j-1].x;
-                            // tiles[k].y = grid[i][j-1].y;
                             grid[i][j-1].taken = grid[i][j].taken;
                             grid[i][j].taken = 0;
                             grid[i][j-1].value = grid[i][j].value;
                             grid[i][j].value = 1;
                             moveLeftAnimation(grid[i][j-1].x, grid[i][j-1].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         }
                     } else if (j == 2) {
                         if (grid[i][j-2].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[i][j-2].x;
-                            // tiles[k].y = grid[i][j-2].y;
                             grid[i][j-2].taken = grid[i][j].taken;
                             grid[i][j].taken = 0;
                             grid[i][j-2].value = grid[i][j].value;
                             grid[i][j].value = 1;
                             moveLeftAnimation(grid[i][j-2].x, grid[i][j-2].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         } else if (grid[i][j-1].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[i][j-1].x;
-                            // tiles[k].y = grid[i][j-1].y;
                             grid[i][j-1].taken = grid[i][j].taken;
                             grid[i][j].taken = 0;
                             grid[i][j-1].value = grid[i][j].value;
                             grid[i][j].value = 1;
                             moveLeftAnimation(grid[i][j-1].x, grid[i][j-1].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         }
                     } else if (j == 3) {
                         if (grid[i][j-3].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[i][j-3].x;
-                            // tiles[k].y = grid[i][j-3].y;
                             grid[i][j-3].taken = grid[i][j].taken;
                             grid[i][j].taken = 0;
                             grid[i][j-3].value = grid[i][j].value;
                             grid[i][j].value = 1;
                             moveLeftAnimation(grid[i][j-3].x, grid[i][j-3].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         } else if (grid[i][j-2].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[i][j-2].x;
-                            // tiles[k].y = grid[i][j-2].y;
                             grid[i][j-2].taken = grid[i][j].taken;
                             grid[i][j].taken = 0;
                             grid[i][j-2].value = grid[i][j].value;
                             grid[i][j].value = 1;
                             moveLeftAnimation(grid[i][j-2].x, grid[i][j-2].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         } else if (grid[i][j-1].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[i][j-1].x;
-                            // tiles[k].y = grid[i][j-1].y;
                             grid[i][j-1].taken = grid[i][j].taken;
                             grid[i][j].taken = 0;
                             grid[i][j-1].value = grid[i][j].value;
                             grid[i][j].value = 1;
                             moveLeftAnimation(grid[i][j-1].x, grid[i][j-1].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         }
@@ -865,85 +773,55 @@ function moveRight() {
                 if ((grid[i][j].x == tiles[k].x) && (grid[i][j].y == tiles[k].y)) {
                     if (j == 2) {
                         if (grid[i][j+1].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[i][j+1].x;
-                            // tiles[k].y = grid[i][j+1].y;
                             grid[i][j+1].taken = grid[i][j].taken;
                             grid[i][j].taken = 0;
                             grid[i][j+1].value = grid[i][j].value;
                             grid[i][j].value = 1;
                             moveRightAnimation(grid[i][j+1].x, grid[i][j+1].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         }
                     } else if (j == 1) {
                         if (grid[i][j+2].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[i][j+2].x;
-                            // tiles[k].y = grid[i][j+2].y;
                             grid[i][j+2].taken = grid[i][j].taken;
                             grid[i][j].taken = 0;
                             grid[i][j+2].value = grid[i][j].value;
                             grid[i][j].value = 1;
                             moveRightAnimation(grid[i][j+2].x, grid[i][j+2].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         } else if (grid[i][j+1].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[i][j+1].x;
-                            // tiles[k].y = grid[i][j+1].y;
                             grid[i][j+1].taken = grid[i][j].taken;
                             grid[i][j].taken = 0;
                             grid[i][j+1].value = grid[i][j].value;
                             grid[i][j].value = 1;
                             moveRightAnimation(grid[i][j+1].x, grid[i][j+1].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         }
                     } else if (j == 0) {
                         if (grid[i][j+3].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[i][j+3].x;
-                            // tiles[k].y = grid[i][j+3].y;
                             grid[i][j+3].taken = grid[i][j].taken;
                             grid[i][j].taken = 0;
                             grid[i][j+3].value = grid[i][j].value;
                             grid[i][j].value = 1;
                             moveRightAnimation(grid[i][j+3].x, grid[i][j+3].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         } else if (grid[i][j+2].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[i][j+2].x;
-                            // tiles[k].y = grid[i][j+2].y;
                             grid[i][j+2].taken = grid[i][j].taken;
                             grid[i][j].taken = 0;
                             grid[i][j+2].value = grid[i][j].value;
                             grid[i][j].value = 1;
                             moveRightAnimation(grid[i][j+2].x, grid[i][j+2].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         } else if (grid[i][j+1].taken == 0) {
-                            // tiles[k].clearTile();
-                            // tiles[k].x = grid[i][j+1].x;
-                            // tiles[k].y = grid[i][j+1].y;
                             grid[i][j+1].taken = grid[i][j].taken;
                             grid[i][j].taken = 0;
                             grid[i][j+1].value = grid[i][j].value;
                             grid[i][j].value = 1;
                             moveRightAnimation(grid[i][j+1].x, grid[i][j+1].y, k);
-                            // tiles[k].drawTile();
-                            // tiles[k].drawValue();
                             tiles[k].clearTile();
                             tileMoved = true;
                         }
@@ -1000,8 +878,8 @@ function moveBox(event) {
                     // test();
                     // color1();
                     window.addEventListener("keydown", moveBox);
-                }, 64);
-            }, 64);
+                }, 40);
+            }, 80);
 
             break;
         case(keyPressed == upArrow || keyPressed == upW):
@@ -1023,9 +901,9 @@ function moveBox(event) {
                     // test();
                     // color1();
                     window.addEventListener("keydown", moveBox);
-                }, 64);
-            }, 64);
-        
+                }, 40);
+            }, 80);
+
             break;
         case(keyPressed == rightArrow || keyPressed == rightD):
             window.removeEventListener("keydown", moveBox);
@@ -1043,11 +921,11 @@ function moveBox(event) {
                     checkHighScore();
                     checkGameOver();
 
-                    //test();
-                    //color1();
+                    // test();
+                    // color1();
                     window.addEventListener("keydown", moveBox);
-                }, 64);
-            }, 64);
+                }, 40);
+            }, 80);
 
             break;
         case(keyPressed == leftArrow || keyPressed == leftA):
@@ -1069,8 +947,8 @@ function moveBox(event) {
                     // test();
                     // color1();
                     window.addEventListener("keydown", moveBox);
-                }, 64);
-            }, 64);
+                }, 40);
+            }, 80);
 
             break;
         }
