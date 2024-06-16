@@ -6,6 +6,37 @@ h1 {
     margin-top: 50px;
 }
 
+.main-container {
+    display: flex;
+    justify-content: space-evenly;
+    background-color: white;
+}
+
+.left-container {
+    background-color: white;
+    width: 400px;
+}
+
+#recent-games-header {
+    display: flex;
+    justify-content: center;
+    font-family: "Courier", monospace;
+    font-weight: 550;
+
+}
+
+.right-container {
+    background-color: white;
+    width: 400px;
+}
+
+#leaderboard-header {
+    display: flex;
+    justify-content: center;
+    font-family: "Courier", monospace;
+    font-weight: 550;
+}
+
 #gameContainer {
     text-align: center;
 }
@@ -17,6 +48,7 @@ h1 {
 #scoreContainer {
     text-align: center;
     height: 120px;
+    background-color: white;
 }
 
 /*highScore*/
@@ -68,10 +100,16 @@ h1 {
     cursor: pointer;
     font-family: "Courier", monospace;
     font-weight: 550;
+    border: none;
+    background-color: black;
+    color: white;
+    padding: 15px;
+    border-radius: 25px;
 }
 
 #restartBtn:hover {
-    background-color: LightGrey;
+    opacity: 0.7;
+
 }
 
 
@@ -102,10 +140,61 @@ h1 {
     font-size: 25px;
     font-family: "Courier", monospace;
     height: 30px;
-    
     font-weight: 550;
     top: 15%;
     
+}
+
+/*form submission*/
+.form-popup {
+    display: flex;
+    justify-content: center;
+    background-color: blue;
+    width: 100%;
+
+}
+
+.form-container {
+    background-color: white;
+    width: 400px;
+}
+
+.form-container input[type=text] {
+    font-family: "Courier", monospace;
+    font-weight: 550;
+    font-size: 20px;
+    width: 275px;
+    border: none;
+    padding: 5px 0;
+    background: #f1f1f1;
+    height: 25px;
+    margin: 5px 0;
+}
+
+.form-container input[type=text]:focus {
+    outline: none;
+    background-color: #ddd;
+}
+
+.form-container input[type=text]::placeholder {
+    text-align: center;
+}
+
+.submit-btn {
+    cursor: pointer;
+    width: 120px;
+    border: none;
+    background-color: deepskyblue;
+    color: white;
+    font-family: "Courier", monospace;
+    font-weight: 550;
+    font-size: 20px;
+    height: 30px;
+    border-radius: 25px;
+}
+
+.submit-btn:hover {
+    opacity: 0.7;
 }
 
 /*footer*/
@@ -132,4 +221,9 @@ a {
 footer {
     margin-top: 100px;
     text-align: center;
+}
+
+#signature {
+    font-family: "Courier", monospace;
+    font-weight: 550;
 }

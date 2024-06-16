@@ -7,20 +7,38 @@
     </head>
     <body>
         <h1>2048</h1>
-        <div id="gameContainer">
-            <canvas id="gameBoard" width="500" height="500"></canvas>
+        <div class="main-container">
+            <div class="left-container">
+                <h2 id="recent-games-header">Recent Games</h2>
+                <div>
+
+                </div>
+            </div>
+            <div id="gameContainer">
+                <canvas id="gameBoard" width="500" height="500"></canvas>
+            </div>
+            <div class="right-container">
+                <h2 id="leaderboard-header">Top Ranking Players</h2>
+                <div class="form-popup" id="myForm">
+                    <form class="form-container">
+                        <input type="text" name="username" placeholder="Enter Username">
+                        <input type="hidden" name="score" id="highscorePHP">
+                        <button class="submit-btn">Submit</button>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <div id="scoreContainer">
             <div id="highScoreContainer">
-                <div id="highScoreText">BEST</div>
+                <div id="highScoreText">Best</div>
                 <div id="highScore">0</div>
             </div>
             <div id="restartContainer">
-                <button id="restartBtn">RESTART</button>
+                <button id="restartBtn">Restart</button>
             </div>
             <div id="playerScoreContainer">
-                <div id="playerScoreText">SCORE</div>
+                <div id="playerScoreText">Score</div>
                 <div id="playerScore">0</div>
             </div>
         </div>
@@ -28,7 +46,7 @@
         <script src="2048.js"></script>
     </body>
     <footer>
-        <a href="https://www.linkedin.com/in/miguelzavala948/">
+        <a href="https://www.linkedin.com/in/miguelzv/">
             <i class="fa-brands fa-linkedin fa-2xl"></i>
         </a>
         <a href="mailto:zmikey16@gmail.com">
@@ -37,6 +55,6 @@
         <a href="https://github.com/MikeyZv">
             <i class="fa-brands fa-github fa-2xl"></i>
         </a>
-        <p>website coded by Miguel Zavala</p>
+        <p id="signature">website coded by Miguel Zavala</p>
     </footer>
 </html>

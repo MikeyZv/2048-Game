@@ -119,6 +119,7 @@ function checkGameOver() {
         ctx.fillStyle = "black";
         ctx.textAlign = "center";
         ctx.fillText("GAME OVER", gameWidth / 2, gameHeight - 225);
+        openForm();
     }
 }
 
@@ -392,6 +393,7 @@ function checkHighScore() {
 }; 
 
 function restartGame() {
+    closeForm();
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, gameWidth, gameHeight);
     tiles = [];
@@ -844,6 +846,14 @@ function color1() {
 
         }
     }
+}
+
+function openForm() {
+    document.getElementById("myForm").style.display = "flex";
+}
+
+function closeForm() {
+    document.getElementById("myForm").style.display = "none";
 }
 
 //controls
