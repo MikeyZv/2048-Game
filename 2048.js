@@ -6,13 +6,14 @@ const gameWidth =  gameBoard.width;
 const gameHeight = gameBoard.height;
 const restartBtn = document.querySelector("#restartBtn");
 
+
 class Tile {
     value;
     color;
     x;
     y;
-    height = 125;
-    width = 125;
+    height = 150;
+    width = 150;
 
     constructor(value, color, x, y) {
         this.value = value;
@@ -27,7 +28,7 @@ class Tile {
     }
     
     clearTile() {
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "#121212";
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 
@@ -35,7 +36,7 @@ class Tile {
         ctx.font = "550 25px Courier, monospace";
         ctx.fillStyle = "black";
         ctx.textAlign = "center";
-        ctx.fillText(this.value, this.x + 62.5, this.y + 75);
+        ctx.fillText(this.value, this.x + 75, this.y + 75);
     }
     
 };
@@ -51,10 +52,10 @@ window.addEventListener("keydown", moveBox);
 restartBtn.addEventListener("click", restartGame);
 
 let tiles = [];
-let grid = [[{x:0, y:0, taken: 0, value: 1}, {x:125, y:0, taken: 0, value: 1}, {x:250, y:0, taken: 0, value: 1}, {x:375, y:0, taken: 0, value: 1}],
-            [{x:0, y:125, taken: 0, value: 1}, {x:125, y:125, taken: 0, value: 1}, {x:250, y:125, taken: 0, value: 1}, {x:375, y:125, taken: 0, value: 1}],
-            [{x:0, y:250, taken: 0, value: 1}, {x:125, y:250, taken: 0, value: 1}, {x:250, y:250, taken: 0, value: 1}, {x:375, y:250, taken: 0, value: 1}],
-            [{x:0, y:375, taken: 0, value: 1}, {x:125, y:375, taken: 0, value: 1}, {x:250, y:375, taken: 0, value: 1}, {x:375, y:375, taken: 0, value: 1}]];
+let grid = [[{x:0, y:0, taken: 0, value: 1}, {x:150, y:0, taken: 0, value: 1}, {x:300, y:0, taken: 0, value: 1}, {x:450, y:0, taken: 0, value: 1}],
+            [{x:0, y:150, taken: 0, value: 1}, {x:150, y:150, taken: 0, value: 1}, {x:300, y:150, taken: 0, value: 1}, {x:450, y:150, taken: 0, value: 1}],
+            [{x:0, y:300, taken: 0, value: 1}, {x:150, y:300, taken: 0, value: 1}, {x:300, y:300, taken: 0, value: 1}, {x:450, y:300, taken: 0, value: 1}],
+            [{x:0, y:450, taken: 0, value: 1}, {x:150, y:450, taken: 0, value: 1}, {x:300, y:450, taken: 0, value: 1}, {x:450, y:450, taken: 0, value: 1}]];
 let mergePossible;
 let tileMoved = false;
 let tileMerged = false;
@@ -75,8 +76,8 @@ function randomStart() {
         randomIndex1B = Math.floor(Math.random() * 4);
     }
 
-    let firstTile = new Tile(2, "Chartreuse", grid[randomIndex1A][randomIndex1B].x, grid[randomIndex1A][randomIndex1B].y);
-    let secondTile = new Tile(2, "Chartreuse", grid[randomIndex2A][randomIndex2B].x, grid[randomIndex2A][randomIndex2B].y);
+    let firstTile = new Tile(2, "#2ecc71", grid[randomIndex1A][randomIndex1B].x, grid[randomIndex1A][randomIndex1B].y);
+    let secondTile = new Tile(2, "#2ecc71", grid[randomIndex2A][randomIndex2B].x, grid[randomIndex2A][randomIndex2B].y);
 
     grid[randomIndex1A][randomIndex1B].value = 2;
     grid[randomIndex2A][randomIndex2B].value = 2;
@@ -115,10 +116,10 @@ function checkTurn() {
 
 function checkGameOver() {
     if ((!mergePossible) && (tiles.length == 16)) {
-        ctx.font = "80px Courier, monospace";
-        ctx.fillStyle = "black";
-        ctx.textAlign = "center";
-        ctx.fillText("GAME OVER", gameWidth / 2, gameHeight - 225);
+        // ctx.font = "100px Courier, monospace";
+        // ctx.fillStyle = "white";
+        // ctx.textAlign = "center";
+        // ctx.fillText("GAME OVER", gameWidth / 2, gameHeight - 300);
         openForm();
     }
 }
@@ -295,13 +296,13 @@ function randomNewTile() {
         }
 
         let tileValue = 2;
-        let tileColor = "Chartreuse";
+        let tileColor = "#2ecc71";
 
         //10% chance that a tile with value 4 spawns
         chance = Math.floor(Math.random() * 10);
         if (chance == 0) {
             tileValue = 4;
-            tileColor = "LimeGreen";
+            tileColor = "#27ae60";
         }
         
         //creates new tile with assigned values and pushes it into tile array
@@ -327,47 +328,47 @@ function updateColors() {
                 if ((grid[i][j].x == tiles[k].x) && (grid[i][j].y == tiles[k].y)) {
                     switch(true) {
                         case(grid[i][j].value == 2):
-                            tiles[k].color = "Chartreuse";
+                            tiles[k].color = "#2ecc71";
                             tiles[k].value = 2;
                             break;
                         case(grid[i][j].value == 4):
-                            tiles[k].color = "LimeGreen";
+                            tiles[k].color = "#27ae60";
                             tiles[k].value = 4;
                             break;
                         case(grid[i][j].value == 8):
-                            tiles[k].color = "Yellow";
+                            tiles[k].color = "#f1c40f";
                             tiles[k].value = 8;
                             break;
                         case(grid[i][j].value == 16):
-                            tiles[k].color = "Orange";
+                            tiles[k].color = "#f39c12";
                             tiles[k].value = 16;
                             break;
                         case(grid[i][j].value == 32):
-                            tiles[k].color = "OrangeRed";
+                            tiles[k].color = "#e67e22";
                             tiles[k].value = 32;
                             break;
                         case(grid[i][j].value == 64):
-                            tiles[k].color = "Crimson";
+                            tiles[k].color = "#d35400";
                             tiles[k].value = 64;
                             break;
                         case(grid[i][j].value == 128):
-                            tiles[k].color = "Red";
+                            tiles[k].color = "#e74c3c";
                             tiles[k].value = 128;
                             break;
                         case(grid[i][j].value == 256):
-                            tiles[k].color = "Blue";
+                            tiles[k].color = "#c0392b";
                             tiles[k].value = 256;
                             break;
                         case(grid[i][j].value == 512):
-                            tiles[k].color = "Aqua";
+                            tiles[k].color = "#3498db";
                             tiles[k].value = 512;
                             break;
                         case(grid[i][j].value == 1024):
-                            tiles[k].color = "Fuchsia";
+                            tiles[k].color = "#1abc9c";
                             tiles[k].value = 1024;
                             break;
                         case(grid[i][j].value == 2048):
-                            tiles[k].color = "DeepPink";
+                            tiles[k].color = "#8e44ad";
                             tiles[k].value = 2048;
                             break;
                     }
@@ -394,13 +395,13 @@ function checkHighScore() {
 
 function restartGame() {
     closeForm();
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "#121212";
     ctx.fillRect(0, 0, gameWidth, gameHeight);
     tiles = [];
-    grid = [[{x:0, y:0, taken: 0, value: 1}, {x:125, y:0, taken: 0, value: 1}, {x:250, y:0, taken: 0, value: 1}, {x:375, y:0, taken: 0, value: 1}],
-            [{x:0, y:125, taken: 0, value: 1}, {x:125, y:125, taken: 0, value: 1}, {x:250, y:125, taken: 0, value: 1}, {x:375, y:125, taken: 0, value: 1}],
-            [{x:0, y:250, taken: 0, value: 1}, {x:125, y:250, taken: 0, value: 1}, {x:250, y:250, taken: 0, value: 1}, {x:375, y:250, taken: 0, value: 1}],
-            [{x:0, y:375, taken: 0, value: 1}, {x:125, y:375, taken: 0, value: 1}, {x:250, y:375, taken: 0, value: 1}, {x:375, y:375, taken: 0, value: 1}]];
+    grid = [[{x:0, y:0, taken: 0, value: 1}, {x:150, y:0, taken: 0, value: 1}, {x:300, y:0, taken: 0, value: 1}, {x:450, y:0, taken: 0, value: 1}],
+            [{x:0, y:150, taken: 0, value: 1}, {x:150, y:150, taken: 0, value: 1}, {x:300, y:150, taken: 0, value: 1}, {x:450, y:150, taken: 0, value: 1}],
+            [{x:0, y:300, taken: 0, value: 1}, {x:150, y:300, taken: 0, value: 1}, {x:300, y:300, taken: 0, value: 1}, {x:450, y:300, taken: 0, value: 1}],
+            [{x:0, y:450, taken: 0, value: 1}, {x:150, y:450, taken: 0, value: 1}, {x:300, y:450, taken: 0, value: 1}, {x:450, y:450, taken: 0, value: 1}]];
     mergePossible = false;
     tileMoved = false;
     tileMerged = false;
@@ -510,7 +511,7 @@ function moveDownAnimation(x, y, index) {
         } else {
             tiles[index].clearTile();
             tiles[index].x = x;
-            tiles[index].y += 25;
+            tiles[index].y += 50;
             tiles[index].drawTile();
             tiles[index].drawValue();
         }
@@ -527,7 +528,7 @@ function moveUpAnimation(x, y, index) {
         } else {
             tiles[index].clearTile();
             tiles[index].x = x;
-            tiles[index].y -= 25;
+            tiles[index].y -= 50;
             tiles[index].drawTile();
             tiles[index].drawValue();
         }
@@ -543,7 +544,7 @@ function moveLeftAnimation(x, y, index) {
             clearInterval(id);
         } else {
             tiles[index].clearTile();
-            tiles[index].x -= 25;
+            tiles[index].x -= 50;
             tiles[index].y = y;
             tiles[index].drawTile();
             tiles[index].drawValue();
@@ -560,7 +561,7 @@ function moveRightAnimation(x, y, index) {
             clearInterval(id);
         } else {
             tiles[index].clearTile();
-            tiles[index].x += 25;
+            tiles[index].x += 50;
             tiles[index].y = y;
             tiles[index].drawTile();
             tiles[index].drawValue();
@@ -846,17 +847,26 @@ function color1() {
 
         }
     }
-}
+};
 
 function openForm() {
     document.getElementById("myForm").style.display = "flex";
-}
+};
 
 function closeForm() {
     document.getElementById("myForm").style.display = "none";
+};
+
+//"includes/scorehandler.inc.php"
+
+function sendData() {
+    var dataToSend = "username=" + document.getElementById("username").value + "&" + "score=" + highScore;
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("POST", "includes/scorehandler.inc.php", true);
+    xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhttp.send(dataToSend);
 }
 
-//controls
 function moveBox(event) {
     const keyPressed = event.keyCode;
     const upArrow = 38;
@@ -888,8 +898,8 @@ function moveBox(event) {
                     // test();
                     // color1();
                     window.addEventListener("keydown", moveBox);
-                }, 40);
-            }, 80);
+                }, 24);
+            }, 48);
 
             break;
         case(keyPressed == upArrow || keyPressed == upW):
@@ -911,8 +921,8 @@ function moveBox(event) {
                     // test();
                     // color1();
                     window.addEventListener("keydown", moveBox);
-                }, 40);
-            }, 80);
+                }, 24);
+            }, 48);
 
             break;
         case(keyPressed == rightArrow || keyPressed == rightD):
@@ -934,8 +944,8 @@ function moveBox(event) {
                     // test();
                     // color1();
                     window.addEventListener("keydown", moveBox);
-                }, 40);
-            }, 80);
+                }, 24);
+            }, 48);
 
             break;
         case(keyPressed == leftArrow || keyPressed == leftA):
@@ -957,8 +967,8 @@ function moveBox(event) {
                     // test();
                     // color1();
                     window.addEventListener("keydown", moveBox);
-                }, 40);
-            }, 80);
+                }, 24);
+            }, 48);
 
             break;
         }

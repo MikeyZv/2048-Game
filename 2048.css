@@ -1,20 +1,45 @@
+body {
+    background-color: #121212;
+}
+
+.header {
+    background-color: #121212;
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
+    padding-bottom: 35px;
+}
+
+.title-container {
+    background-color: #121212;
+    display: flex;
+    justify-content: center;
+    width: 500px;
+
+}
+
 h1 {
     text-align: center;
-    font-size: 150px;
+    font-size: 175px;
     font-family: "Courier", monospace;
     margin: 0px;
-    margin-top: 50px;
+    background-color: #121212;
+    color: white;
+    height: 150px;
 }
 
 .main-container {
     display: flex;
-    justify-content: space-evenly;
-    background-color: white;
+    justify-content: center;
+    background-color: #121212;
 }
 
+/*recent games*/
 .left-container {
-    background-color: white;
-    width: 400px;
+    background-color: #121212;
+    width: 500px;
+    position: relative;
+    right: 100px;
 }
 
 #recent-games-header {
@@ -22,141 +47,84 @@ h1 {
     justify-content: center;
     font-family: "Courier", monospace;
     font-weight: 550;
+    font-size: 25px;
+    background-color: #121212;
+    color: white;
 
 }
 
-.right-container {
-    background-color: white;
-    width: 400px;
-}
-
-#leaderboard-header {
+.centered-container {
     display: flex;
     justify-content: center;
-    font-family: "Courier", monospace;
-    font-weight: 550;
+    background-color: #121212;
 }
 
+.recent-games-container {
+    background-color: #121212;
+    height: 400px;
+}
+
+.playerNamesRecentGames {
+    font-family: "Courier", monospace;
+    font-weight: 550;
+    font-size: 20px;
+    background-color: #121212;
+    width: 40%;
+    display: inline-flex;
+    color: white;
+}
+
+.playerScoresRecentGames {
+    font-family: "Courier", monospace;
+    font-weight: 550;
+    font-size: 20px;
+    background-color: #121212;
+    display: inline-flex;
+    justify-content: flex-end;
+    width: 35%;
+    color: white;
+}
+
+.played_atRecentGames {
+    font-family: "Courier", monospace;
+    font-weight: 550;
+    font-size: 20px;
+    background-color: #121212;
+    display: inline-flex;
+    justify-content: flex-end;
+    width: 25%;
+    color: white;
+}
+
+/*gameboard*/
 #gameContainer {
     text-align: center;
 }
 
 #gameBoard {
-    border: 3px solid;
+    border: 3px solid #121212;
 }
 
-#scoreContainer {
-    text-align: center;
-    height: 120px;
-    background-color: white;
-}
-
-/*highScore*/
-#highScoreContainer {
-    background-color: white;
-    justify-content: center;
+/*leaderboard*/
+.right-container {
+    background-color: #121212;
+    width: 500px;
     position: relative;
-    display: inline-block;
-    width: 150px;
-    height: 100px;
-    vertical-align: middle;
-    top: 5%;
-    right: 27px;
-}
-
-#highScoreText {
-    position: relative;
-    font-size: 25px;
-    font-family: "Courier", monospace;
-    font-weight: 550;
-    height: 30px;
-    top: 5%;
-    
-}
-
-#highScore {
-    position: relative;
-    font-size: 25px;
-    font-family: "Courier", monospace;
-    height: 30px;
-    font-weight: 550;
-    top: 15%;
-}
-
-/*restart*/
-#restartContainer {
-    background-color: white;
-    display: inline-block;
-    justify-content: center;
-    height: 50px;
-    width: 125px;
-    vertical-align: middle;
-}
-
-#restartBtn {
-    position: relative;
-    font-size: 20px;
-    top: 0%;
-    cursor: pointer;
-    font-family: "Courier", monospace;
-    font-weight: 550;
-    border: none;
-    background-color: black;
-    color: white;
-    padding: 15px;
-    border-radius: 25px;
-}
-
-#restartBtn:hover {
-    opacity: 0.7;
-
-}
-
-
-/*playerScore*/
-#playerScoreContainer {
-    background-color: white;
-    justify-content: center;
-    position: relative; 
-    display: inline-block;
-    width: 150px;
-    height: 100px;
-    vertical-align: middle;
-    top: 5%;
-    left: 27px;
-}
-
-#playerScoreText {
-    position: relative;
-    font-size: 25px;
-    font-family: "Courier", monospace;
-    font-weight: 550;
-    height: 30px;
-    top: 5%;
-}
-
-#playerScore {
-    position: relative;
-    font-size: 25px;
-    font-family: "Courier", monospace;
-    height: 30px;
-    font-weight: 550;
-    top: 15%;
-    
+    left: 100px;
 }
 
 /*form submission*/
 .form-popup {
     display: flex;
     justify-content: center;
-    background-color: blue;
+    background-color: #121212;
     width: 100%;
+    position: relative;
 
 }
 
 .form-container {
-    background-color: white;
-    width: 400px;
+    background-color: #121212;
 }
 
 .form-container input[type=text] {
@@ -169,6 +137,8 @@ h1 {
     background: #f1f1f1;
     height: 25px;
     margin: 5px 0;
+    border-radius: 15px;
+    text-align: center;
 }
 
 .form-container input[type=text]:focus {
@@ -189,41 +159,203 @@ h1 {
     font-family: "Courier", monospace;
     font-weight: 550;
     font-size: 20px;
-    height: 30px;
+    height: 35px;
     border-radius: 25px;
+    position: relative;
+    left: 5px;
 }
 
 .submit-btn:hover {
     opacity: 0.7;
 }
 
+#leaderboard-header {
+    display: flex;
+    justify-content: center;
+    font-family: "Courier", monospace;
+    font-weight: 550;
+    font-size: 25px;
+    color: white;
+    background-color: #121212;
+}
+
+.leaderboard-container {
+    position: relative;
+    background-color: #121212;
+    height: 400px;
+    top: 24px;
+}
+
+.playerIDsLeaderboard {
+    font-family: "Courier", monospace;
+    font-weight: 550;
+    font-size: 25px;
+    background-color: #121212;
+    width: 7%;
+    display: inline-flex;
+    color: white;
+}
+
+.playerNamesLeaderboard {
+    font-family: "Courier", monospace;
+    font-weight: 550;
+    font-size: 25px;
+    background-color: #121212;
+    width: 53%;
+    display: inline-flex;
+    color: white;
+}
+
+.playerScoresLeaderboard {
+    font-family: "Courier", monospace;
+    font-weight: 550;
+    font-size: 25px;
+    background-color: #121212;
+    display: inline-flex;
+    justify-content: flex-end;
+    width: 40%;
+    color: white;
+}
+
+#scoreContainer {
+    display: flex;
+    justify-content: center;
+    background-color: #121212;
+}
+
+/*highScore*/
+#highScoreContainer {
+    background-color: #121212;
+    width: 200px;
+    height: 100px;
+    position: relative;
+    right: 50px;
+}
+
+#highScoreText {
+    background-color: #121212;
+    font-size: 25px;
+    font-family: "Courier", monospace;
+    font-weight: 550;
+    color: white;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    top: 10px;
+    
+}
+
+#highScore {
+    background-color: #121212;
+    font-size: 25px;
+    font-family: "Courier", monospace;
+    font-weight: 550;
+    color: white;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    top: 10px;
+}
+
+/*restart*/
+#middle-score-container {
+    background-color: #121212;
+    display: flex;
+    align-items: center;
+}
+
+#restartContainer {
+    background-color: #121212;
+    display: flex;
+    justify-content: center;
+    height: 50px;
+    width: 125px;
+}
+
+#restartBtn {
+    position: relative;
+    font-size: 20px;
+    cursor: pointer;
+    font-family: "Courier", monospace;
+    font-weight: 550;
+    border: none;
+    background-color: deepskyblue;
+    color: white;
+    padding: 15px;
+    border-radius: 25px;
+}
+
+#restartBtn:hover {
+    opacity: 0.7;
+
+}
+
+
+/*playerScore*/
+#playerScoreContainer {
+    background-color: #121212;
+    width: 200px;
+    height: 100px;
+    position: relative;
+    left: 50px;
+}
+
+#playerScoreText {
+    background-color: #121212;
+    font-size: 25px;
+    font-family: "Courier", monospace;
+    font-weight: 550;
+    color: white;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    top: 10px;
+}
+
+#playerScore {
+    background-color: #121212;
+    font-size: 25px;
+    font-family: "Courier", monospace;
+    font-weight: 550;
+    color: white;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    top: 10px;
+    
+}
+
 /*footer*/
+footer {
+    margin-top: 100px;
+    text-align: center;
+    background-color: #121212;
+}
+
 a {
     text-decoration: none;
+    background-color: #121212;
 }
 
 .fa-linkedin {
     position: relative;
     right: 2%;
-    color: #0072b1;
+    color: white;
 }
 
 .fa-envelope {
-    color: black;
+    color: white;
+
 }
 
 .fa-github{
     position: relative;
     left: 2%;
-    color: #171515;
-}
-
-footer {
-    margin-top: 100px;
-    text-align: center;
+    color: white;
 }
 
 #signature {
     font-family: "Courier", monospace;
     font-weight: 550;
+    color: white;
 }
