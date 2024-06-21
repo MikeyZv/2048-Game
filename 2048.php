@@ -3,14 +3,17 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="index.css" rel="stylesheet"/>
         <script src="https://kit.fontawesome.com/6d56778525.js" crossorigin="anonymous"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Genos:ital,wght@0,100..900;1,100..900&family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
     </head>
     <body>
         <div class="header">
             <div class="title-container">
                 <h1>2048</h1>
+                <div id="directions-header">Merge tiles to reach 2048!</div>
             </div>
         </div>
         <div class="main-container">
@@ -30,7 +33,7 @@
                                 foreach ($results as $row) {
                                     echo "<div class='playerNamesRecentGames'>" . htmlspecialchars($row['username']) . "</div>";
                                     echo "<div class='playerScoresRecentGames'>" . htmlspecialchars($row['score']) . '|' . "</div>";
-                                    echo "<div class='played_atRecentGames'>" . htmlspecialchars($row['played_at']) . "</div>";
+                                    echo "<div class='played_atRecentGames'>" . htmlspecialchars($row['preciseTime']) . "</div>";
                                 }
                                 
                             } catch (PDOException $e) {

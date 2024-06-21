@@ -33,10 +33,10 @@ class Tile {
     }
 
     drawValue() {
-        ctx.font = "550 25px Courier, monospace";
-        ctx.fillStyle = "black";
+        ctx.font = "550 50px 'Genos', sans-serif";
+        ctx.fillStyle = "white";
         ctx.textAlign = "center";
-        ctx.fillText(this.value, this.x + 75, this.y + 75);
+        ctx.fillText(this.value, this.x + 75, this.y + 85);
     }
     
 };
@@ -116,13 +116,15 @@ function checkTurn() {
 
 function checkGameOver() {
     if ((!mergePossible) && (tiles.length == 16)) {
-        // ctx.font = "100px Courier, monospace";
-        // ctx.fillStyle = "white";
-        // ctx.textAlign = "center";
-        // ctx.fillText("GAME OVER", gameWidth / 2, gameHeight - 300);
+        ctx.fillStyle = "white";
+        ctx.font = "550 80px 'Genos', sans-serif";
+        ctx.fillText("[GAME OVER]", gameWidth / 2, gameHeight - 300);
+        ctx.font = "550 25px 'Genos', sans-serif";
+        ctx.fillText("SUBMIT YOUR SCORE ->", gameWidth / 2, gameHeight - 275);
+        ctx.textAlign = "center";
         openForm();
     }
-}
+};
 
 //test function
 function test() {
@@ -865,7 +867,7 @@ function sendData() {
     xhttp.open("POST", "includes/scorehandler.inc.php", true);
     xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhttp.send(dataToSend);
-}
+};
 
 function moveBox(event) {
     const keyPressed = event.keyCode;
