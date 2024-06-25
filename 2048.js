@@ -48,9 +48,6 @@ window.addEventListener("keydown", function(e) {
     }
 }, false);
 
-window.addEventListener("keydown", moveBox);
-restartBtn.addEventListener("click", restartGame);
-
 let tiles = [];
 let grid = [[{x:0, y:0, taken: 0, value: 1}, {x:150, y:0, taken: 0, value: 1}, {x:300, y:0, taken: 0, value: 1}, {x:450, y:0, taken: 0, value: 1}],
             [{x:0, y:150, taken: 0, value: 1}, {x:150, y:150, taken: 0, value: 1}, {x:300, y:150, taken: 0, value: 1}, {x:450, y:150, taken: 0, value: 1}],
@@ -61,7 +58,22 @@ let tileMoved = false;
 let tileMerged = false;
 let score = 0;
 let highScore = 0;
-randomStart();
+
+//prevents page from refreshing when submitting form
+var form = document.getElementById("myForm");
+form.addEventListener('submit', handleForm);
+function handleForm(event) { 
+    event.preventDefault(); 
+};
+
+function start() {
+    if(document.getElementById("username").value.length > 0) {
+        closeForm();
+        window.addEventListener("keydown", moveBox);
+        restartBtn.addEventListener("click", restartGame);
+        randomStart();
+    }
+};
 
 //randomly places two tiles on the board at the beginning of the game but they can't overlap
 function randomStart() {
@@ -93,19 +105,6 @@ function randomStart() {
     tiles[1].drawValue();
 };
 
-//checks to see which spaces on the grid are taken
-function checkTaken () {
-    for (let i = 0; i < tiles.length; i++) { //tile
-        for (let j = 0; j < 4; j++) { //row
-            for (let k = 0; k < 4; k++) { //column
-                if ((tiles[i].x == grid[j][k].x) && (tiles[i].y == grid[j][k].y)) { //if tile coordinates equal gridbox coordinates
-                    grid[j][k].taken = 1; //current gridbox is taken
-                }
-            }
-        }
-    }
-};
-
 function checkTurn() {
     if ((tileMoved || tileMerged) && (tiles.length < 16)) { //if tile moves or tile merges and the length of tile array is less than 16
         randomNewTile(); //spawn new tile
@@ -122,7 +121,7 @@ function checkGameOver() {
         ctx.font = "550 25px 'Genos', sans-serif";
         ctx.fillText("SUBMIT YOUR SCORE ->", gameWidth / 2, gameHeight - 275);
         ctx.textAlign = "center";
-        openForm();
+        sendData();
     }
 };
 
@@ -130,7 +129,7 @@ function checkGameOver() {
 function test() {
     if (!mergePossible) {
         ctx.font = "30px Courier, monospace";
-        ctx.fillStyle = "black";
+        ctx.fillStyle = "white";
         ctx.textAlign = "center";
         ctx.fillText("no merge possible", gameWidth / 2, gameHeight - 100);
     }
@@ -396,7 +395,6 @@ function checkHighScore() {
 }; 
 
 function restartGame() {
-    closeForm();
     ctx.fillStyle = "#121212";
     ctx.fillRect(0, 0, gameWidth, gameHeight);
     tiles = [];
@@ -415,9 +413,9 @@ function restartGame() {
 
 //merges tiles if possible
 function mergeDownTiles() {
-    for (let i = 0; i < 4; i++) { //column
-        for (let j = 2; j > -1; j--) { //row
-            for (let k = 0; k < tiles.length; k++) { //tile
+    for (let i = 0; i < 4; i++) { //begins at first column
+        for (let j = 2; j > -1; j--) { //begins at third row
+            for (let k = 0; k < tiles.length; k++) { //traverses through tile array
                 if ((grid[j][i].x == tiles[k].x) && (grid[j][i].y == tiles[k].y)) { //if gridbox coordinates equal tile coordinates
                     if (grid[j+1][i].taken == 1) { //if gridbox is taken in row below current gridbox 
                         if (grid[j][i].value == grid[j+1][i].value) { //if gridbox value is the same as the gridbox value below it
@@ -512,7 +510,6 @@ function moveDownAnimation(x, y, index) {
             clearInterval(id);
         } else {
             tiles[index].clearTile();
-            tiles[index].x = x;
             tiles[index].y += 50;
             tiles[index].drawTile();
             tiles[index].drawValue();
@@ -574,21 +571,21 @@ function moveRightAnimation(x, y, index) {
 
 //moves tiles
 function moveDown() {
-    for (let i = 0; i < 4; i++) { //column
-        for (let j = 2; j > -1; j--) { //row
-            for (let k = 0; k < tiles.length; k++) { //tile
+    for (let i = 0; i < 4; i++) { //begins at first column
+        for (let j = 2; j > -1; j--) { //begins at third row
+            for (let k = 0; k < tiles.length; k++) { //traverse through tile array
                 if ((grid[j][i].x == tiles[k].x) && (grid[j][i].y == tiles[k].y)) { //if grid coordinates equal tile coordinates
-                    if (j == 2) { //row 2
-                        if (grid[j+1][i].taken == 0) { //if gridbox in row 3 is free
-                            grid[j+1][i].taken = grid[j][i].taken; //gridbox in row 3 is now taken
-                            grid[j][i].taken = 0;
-                            grid[j+1][i].value = grid[j][i].value; //updates gridbox value in row 3 with current gridbox value
+                    if (j == 2) { //row 3
+                        if (grid[j+1][i].taken == 0) { //if gridbox in row 3 is empty
+                            grid[j+1][i].taken = grid[j][i].taken; //gridbox in row 4 is now taken
+                            grid[j][i].taken = 0; //sets current gridbox taken back to 0 meaning 'empty'
+                            grid[j+1][i].value = grid[j][i].value; //updates gridbox value in row 4 with current gridbox value
                             grid[j][i].value = 1; //sets current gridbox value back to 1
                             moveDownAnimation(grid[j+1][i].x, grid[j+1][i].y, k);
                             tiles[k].clearTile();
                             tileMoved = true; //tile successfully moved
                         }
-                    } else if (j == 1) { //row 1
+                    } else if (j == 1) { //row 2
                         if (grid[j+2][i].taken == 0) {
                             grid[j+2][i].taken = grid[j][i].taken;
                             grid[j][i].taken = 0;
@@ -606,7 +603,7 @@ function moveDown() {
                             tiles[k].clearTile();
                             tileMoved = true;
                         }
-                    } else if (j == 0) { //row 0
+                    } else if (j == 0) { //row 1
                         if (grid[j+3][i].taken == 0) {
                             grid[j+3][i].taken = grid[j][i].taken;
                             grid[j][i].taken = 0;
@@ -842,7 +839,7 @@ function color1() {
     for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
             ctx.font = "20px Courier, monospace";
-            ctx.fillStyle = "black";
+            ctx.fillStyle = "white";
             ctx.textAlign = "center";
             ctx.fillText(grid[i][j].value, grid[i][j].x + 10, grid[i][j].y + 50);
             ctx.fillText(grid[i][j].taken, grid[i][j].x + 10, grid[i][j].y + 15);
@@ -862,6 +859,7 @@ function closeForm() {
 //"includes/scorehandler.inc.php"
 
 function sendData() {
+    //document.getElementById("submitbtn").disabled = false;
     var dataToSend = "username=" + document.getElementById("username").value + "&" + "score=" + highScore;
     var xhttp = new XMLHttpRequest();
     xhttp.open("POST", "includes/scorehandler.inc.php", true);

@@ -3,6 +3,7 @@
 <html>
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, inital-scale=1.0">
         <link href="index.css" rel="stylesheet"/>
         <script src="https://kit.fontawesome.com/6d56778525.js" crossorigin="anonymous"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,15 +46,21 @@
             </div>
             <div id="gameContainer">
                 <canvas id="gameBoard" width="600" height="600"></canvas>
-            </div>
-            <div class="right-container">
-                <h2 id="leaderboard-header">Top Ranking Players</h2>
                 <div class="form-popup" id="myForm">
                     <form class="form-container">
                         <input type="text" id="username" placeholder="Enter Username">
-                        <button class="submit-btn" onclick="sendData()">Submit</button>
+                        <button class="submit-btn" onclick="start()">Submit</button>
                     </form>
                 </div>
+            </div>
+            <div class="right-container">
+                <h2 id="leaderboard-header">Top Ranking Players</h2>
+                <!-- <div class="form-popup" id="myForm">
+                    <form class="form-container">
+                        <input type="text" id="username" placeholder="Enter Username" required>
+                        <button id="submitbtn" class="submit-btn" onclick="sendData()">Submit</button>
+                    </form>
+                </div> -->
                 <div class="leaderboard-container">
                     <?php
                     try {
