@@ -114,7 +114,8 @@ function checkTurn() {
 };
 
 function checkGameOver() {
-    if ((!mergePossible) && (tiles.length == 16)) {
+    if ((mergePossible == false) && (tiles.length == 16)) {
+        window.removeEventListener("keydown", moveBox);
         ctx.fillStyle = "white";
         ctx.font = "550 80px 'Genos', sans-serif";
         ctx.fillText("[GAME OVER]", gameWidth / 2, gameHeight - 300);
@@ -859,7 +860,6 @@ function closeForm() {
 //"includes/scorehandler.inc.php"
 
 function sendData() {
-    //document.getElementById("submitbtn").disabled = false;
     var dataToSend = "username=" + document.getElementById("username").value + "&" + "score=" + highScore;
     var xhttp = new XMLHttpRequest();
     xhttp.open("POST", "includes/scorehandler.inc.php", true);
@@ -893,11 +893,11 @@ function moveBox(event) {
                     drawTiles();
                     updateScore();
                     checkHighScore();
-                    checkGameOver();
 
                     // test();
                     // color1();
                     window.addEventListener("keydown", moveBox);
+                    checkGameOver();
                 }, 24);
             }, 48);
 
@@ -916,11 +916,11 @@ function moveBox(event) {
                     drawTiles();
                     updateScore();
                     checkHighScore();
-                    checkGameOver();
 
                     // test();
                     // color1();
                     window.addEventListener("keydown", moveBox);
+                    checkGameOver();
                 }, 24);
             }, 48);
 
@@ -939,11 +939,11 @@ function moveBox(event) {
                     drawTiles();
                     updateScore();
                     checkHighScore();
-                    checkGameOver();
 
                     // test();
                     // color1();
                     window.addEventListener("keydown", moveBox);
+                    checkGameOver();
                 }, 24);
             }, 48);
 
@@ -962,11 +962,11 @@ function moveBox(event) {
                     drawTiles();
                     updateScore();
                     checkHighScore();
-                    checkGameOver();
 
                     // test();
                     // color1();
                     window.addEventListener("keydown", moveBox);
+                    checkGameOver();
                 }, 24);
             }, 48);
 
