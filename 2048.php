@@ -55,12 +55,6 @@
             </div>
             <div class="right-container">
                 <h2 id="leaderboard-header">Top Ranking Players</h2>
-                <!-- <div class="form-popup" id="myForm">
-                    <form class="form-container">
-                        <input type="text" id="username" placeholder="Enter Username" required>
-                        <button id="submitbtn" class="submit-btn" onclick="sendData()">Submit</button>
-                    </form>
-                </div> -->
                 <div class="leaderboard-container">
                     <?php
                     try {
