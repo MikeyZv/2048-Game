@@ -1,12 +1,20 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
 body {
     background-color: #121212;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .header {
     background-color: #121212;
     display: flex;
     justify-content: center;
-    margin-bottom: 5px;
+    width: 100%;
 }
 
 .title-container {
@@ -14,48 +22,50 @@ body {
     display: flex;
     justify-content: center;
     flex-direction: column;
-    width: 500px;
-
+    width: 100%;
+    margin-bottom: 25px;
 }
 
 h1 {
     text-align: center;
-    font-size: 175px;
+    font-size: 140px;
     font-family: "Genos", sans-serif;
-    margin: 0px;
     background-color: #121212;
     color: white;
-    height: 160px;
+    width: 100%;
+    height: 140px;
 }
 
 #directions-header {
     text-align: center;
-    font-size: 30px;
+    font-size: 25px;
     font-family: "Genos", sans-serif;
     font-weight: 550;
     color: white;
+    background-color: #121212;
 }
 
 .main-container {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: space-evenly;
     background-color: #121212;
+    width: 100%;
 }
 
 /*recent games*/
-.left-container {
+#recent-games {
     background-color: #121212;
-    width: 500px;
-    position: relative;
-    right: 100px;
+    width: 100%;
 }
 
 #recent-games-header {
     display: flex;
     justify-content: center;
+    text-align: center;
     font-family: "Genos", sans-serif;
     font-weight: 550;
-    font-size: 45px;
+    font-size: 35px;
     background-color: #121212;
     color: white;
 
@@ -69,13 +79,14 @@ h1 {
 
 .recent-games-container {
     background-color: #121212;
-    height: 400px;
+    height: 350px;
+    width: 90%;
 }
 
 .playerNamesRecentGames {
     font-family: "Genos", sans-serif;
     font-weight: 550;
-    font-size: 20px;
+    font-size: 15px;
     background-color: #121212;
     width: 40%;
     display: inline-flex;
@@ -85,36 +96,43 @@ h1 {
 .playerScoresRecentGames {
     font-family: "Genos", sans-serif;
     font-weight: 550;
-    font-size: 20px;
+    font-size: 15px;
     background-color: #121212;
     display: inline-flex;
     justify-content: flex-end;
-    width: 25%;
+    width: 15%;
     color: white;
 }
 
 .played_atRecentGames {
     font-family: "Genos", sans-serif;
     font-weight: 550;
-    font-size: 20px;
+    font-size: 15px;
     background-color: #121212;
     display: inline-flex;
     justify-content: flex-end;
-    width: 35%;
+    width: 45%;
     color: white;
 }
 
 /*gameboard*/
+#gameContainer {
+    background-color: #121212;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
 #gameBoard {
-    border: 3px solid #121212;
+    background-color: #121212;
+    width: 100%;
 }
 
 /*leaderboard*/
-.right-container {
+#leaderboard {
     background-color: #121212;
-    width: 500px;
-    position: relative;
-    left: 100px;
+    width: 100%;
 }
 
 /*form submission*/
@@ -122,15 +140,14 @@ h1 {
     display: flex;
     justify-content: center;
     background-color: none;
-    width: 606px;
+    width: 100%;
+    background-color: #121212;
     position: absolute;
-    bottom: 400px;
-
 }
 
 .form-container {
     background-color: white;
-    width: 400px;
+    width: 80%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -163,7 +180,7 @@ h1 {
 
 .submit-btn {
     cursor: pointer;
-    width: 120px;
+    width: 30%;
     border: none;
     background-color: deepskyblue;
     color: white;
@@ -181,22 +198,27 @@ h1 {
 #leaderboard-header {
     display: flex;
     justify-content: center;
+    text-align: center;
     font-family: "Genos", sans-serif;
     font-weight: 550;
-    font-size: 45px;
-    color: white;
-    background-color: #121212;
+    font-size: 35px;
+    background-image: linear-gradient(to right, red,orange,yellow,green,blue,indigo,violet, red);
+    animation: rainbow-animation 35s linear infinite;
+    background-clip: text;
+    color: transparent;
+    width: 100%;
 }
 
 .leaderboard-container {
     background-color: #121212;
-    height: 400px;
+    height: 350px;
+    width: 90%;
 }
 
 .playerIDsLeaderboard {
     font-family: "Genos", sans-serif;
     font-weight: 550;
-    font-size: 30px;
+    font-size: 25px;
     background-color: #121212;
     width: 8%;
     display: inline-flex;
@@ -206,7 +228,7 @@ h1 {
 .playerNamesLeaderboard {
     font-family: "Genos", sans-serif;
     font-weight: 550;
-    font-size: 30px;
+    font-size: 25px;
     background-color: #121212;
     width: 52%;
     display: inline-flex;
@@ -216,7 +238,7 @@ h1 {
 .playerScoresLeaderboard {
     font-family: "Genos", sans-serif;
     font-weight: 550;
-    font-size: 30px;
+    font-size: 25px;
     background-color: #121212;
     display: inline-flex;
     justify-content: flex-end;
@@ -224,19 +246,23 @@ h1 {
     color: white;
 }
 
-#scoreContainer {
+#lower-main-container {
     display: flex;
     justify-content: center;
     background-color: #121212;
 }
 
+#scoreContainer {
+    display: flex;
+    justify-content: space-evenly;
+    background-color: #121212;
+    width: 100%;
+}
+
 /*highScore*/
 #highScoreContainer {
     background-color: #121212;
-    width: 200px;
     height: 100px;
-    position: relative;
-    right: 50px;
 }
 
 #highScoreText {
@@ -276,7 +302,6 @@ h1 {
     display: flex;
     justify-content: center;
     height: 50px;
-    width: 125px;
 }
 
 #restartBtn {
@@ -296,17 +321,13 @@ h1 {
 
 #restartBtn:hover {
     opacity: 0.7;
-
 }
 
 
 /*playerScore*/
 #playerScoreContainer {
     background-color: #121212;
-    width: 200px;
     height: 100px;
-    position: relative;
-    left: 50px;
 }
 
 #playerScoreText {
@@ -336,9 +357,11 @@ h1 {
 
 /*footer*/
 footer {
-    margin-top: 100px;
     text-align: center;
     background-color: #121212;
+    width: 100%;
+    margin-top: 75px;
+    margin-bottom: 25px;
 }
 
 a {
@@ -354,7 +377,6 @@ a {
 
 .fa-envelope {
     color: white;
-
 }
 
 .fa-github{
@@ -363,75 +385,26 @@ a {
     color: white;
 }
 
-#signature {
-    font-family: "Genos", sans-serif;
-    font-weight: 550;
-    color: white;
+@keyframes rainbow-animation {
+    to {
+        background-position: 4500vh;
+    }
 }
 
-@media (max-width: 600px) {
-
-    .header {
-        background-color: #121212;
-        display: flex;
-        justify-content: center;
-        margin-bottom: 5px;
-        width: 600px;
-    }
-    
+@media (min-width: 1000px) {
     .main-container {
-        background-color: #121212;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        width: 600px;
+        flex-direction: row;
     }
 
-    .left-container {
-        background-color: #121212;
-        width: 600px;
-        position: relative;
-        right: 0%;
-        top: 1230px;
-    }
-
-    #gameContainer {
-        position: relative;
-        bottom: 530px;
+    #recent-games {
+        order: -1;
     }
 
     .form-popup {
-        display: flex;
-        justify-content: center;
-        background-color: none;
-        width: 606px;
-        position: absolute;
-        bottom: 300px;
-    
-    }
-    
-    .right-container {
-        background-color: #121212;
-        width: 600px;
-        position: relative;
-        left: 0%;
-        bottom: 440px;
+        width: 34%;
     }
 
-    #scoreContainer {
-        display: flex;
-        justify-content: center;
-        background-color: #121212;
-        width: 600px;
-        position: relative;
-        bottom: 1060px;
-    }
 
-    footer {
-        margin-top: 100px;
-        text-align: center;
-        background-color: #121212;
-        width: 600px;
-    }
     
+
 }

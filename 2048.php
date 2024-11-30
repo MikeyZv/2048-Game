@@ -3,7 +3,7 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, inital-scale=1.0">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
         <link href="index.css" rel="stylesheet"/>
         <script src="https://kit.fontawesome.com/6d56778525.js" crossorigin="anonymous"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,58 @@
             </div>
         </div>
         <div class="main-container">
-            <div class="left-container">
+            <div id="gameContainer">
+                <div class="form-popup" id="myForm">
+                    <form class="form-container">
+                        <input type="text" id="username" placeholder="Enter Username">
+                        <button class="submit-btn" onclick="start()">Submit</button>
+                    </form>
+                </div>
+                <canvas id="gameBoard" width="600" height="600"></canvas>
+                <div id="lower-main-container">
+                    <div id="scoreContainer">
+                        <div id="highScoreContainer">
+                            <div id="highScoreText">Best</div>
+                            <div id="highScore">0</div>
+                        </div>
+                        <div id="middle-score-container">
+                            <div id="restartContainer">
+                                <button id="restartBtn">Restart</button>
+                            </div>
+                        </div>
+                        <div id="playerScoreContainer">
+                            <div id="playerScoreText">Score</div>
+                            <div id="playerScore">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="leaderboard">
+                <h2 id="leaderboard-header">Top Ranking Players</h2>
+                <div class="centered-container">
+                    <div class="leaderboard-container">
+                        <?php
+                        try {
+                            require_once "includes/dbh.inc.php";
+                            $query = "SELECT * FROM leaderboard ORDER BY score DESC;";
+                            $stmt = $pdo->prepare($query);
+                            $stmt->execute();
+                            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                            foreach ($results as $row) {
+                                echo "<div class='playerIDsLeaderboard'>" . htmlspecialchars($row['id']) . "</div>";
+                                echo "<div class='playerNamesLeaderboard'>" . htmlspecialchars($row['username']) . "</div>";
+                                echo "<div class='playerScoresLeaderboard'>" . htmlspecialchars($row['score']) . "</div>";
+                            }
+
+                        } catch (PDOException $e) {
+                            die("Query failed: " . $e->getMessage());
+                        }  
+                        ?>
+                    </div>
+                </div>
+            </div>
+            <div id="recent-games">
                 <h2 id="recent-games-header">Most Recent Players</h2>
                 <div class="centered-container">
                     <div class="recent-games-container">
@@ -33,66 +84,19 @@
 
                                 foreach ($results as $row) {
                                     echo "<div class='playerNamesRecentGames'>" . htmlspecialchars($row['username']) . "</div>";
-                                    echo "<div class='playerScoresRecentGames'>" . htmlspecialchars($row['score']) . '|' . "</div>";
+                                    echo "<div class='playerScoresRecentGames'>" . htmlspecialchars($row['score']) . "</div>";
                                     echo "<div class='played_atRecentGames'>" . htmlspecialchars($row['preciseTime']) . "</div>";
                                 }
                                 
+                                $pdo = null;
+                                $stmt = null;
+
                             } catch (PDOException $e) {
                                 die("Query failed: " . $e->getMessage());
                             }  
                         ?>
                     </div>
                 </div>
-            </div>
-            <div id="gameContainer">
-                <canvas id="gameBoard" width="600" height="600"></canvas>
-                <div class="form-popup" id="myForm">
-                    <form class="form-container">
-                        <input type="text" id="username" placeholder="Enter Username">
-                        <button class="submit-btn" onclick="start()">Submit</button>
-                    </form>
-                </div>
-            </div>
-            <div class="right-container">
-                <h2 id="leaderboard-header">Top Ranking Players</h2>
-                <div class="leaderboard-container">
-                    <?php
-                    try {
-                        require_once "includes/dbh.inc.php";
-                        $query = "SELECT * FROM leaderboard ORDER BY score DESC;";
-                        $stmt = $pdo->prepare($query);
-                        $stmt->execute();
-                        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                        foreach ($results as $row) {
-                            echo "<div class='playerIDsLeaderboard'>" . htmlspecialchars($row['id']) . "</div>";
-                            echo "<div class='playerNamesLeaderboard'>" . htmlspecialchars($row['username']) . "</div>";
-                            echo "<div class='playerScoresLeaderboard'>" . htmlspecialchars($row['score']) . "</div>";
-                        }
-
-                        $pdo = null;
-                        $stmt = null;
-                    } catch (PDOException $e) {
-                        die("Query failed: " . $e->getMessage());
-                    }  
-                    ?>
-                </div>
-            </div>
-        </div>
-
-        <div id="scoreContainer">
-            <div id="highScoreContainer">
-                <div id="highScoreText">Best</div>
-                <div id="highScore">0</div>
-            </div>
-            <div id="middle-score-container">
-                <div id="restartContainer">
-                    <button id="restartBtn">Restart</button>
-                </div>
-            </div>
-            <div id="playerScoreContainer">
-                <div id="playerScoreText">Score</div>
-                <div id="playerScore">0</div>
             </div>
         </div>
         <script src="index.js"></script>
@@ -107,6 +111,5 @@
         <a href="https://github.com/MikeyZv">
             <i class="fa-brands fa-github fa-2xl"></i>
         </a>
-        <p id="signature">website coded by Miguel Zavala</p>
     </footer>
 </html>
