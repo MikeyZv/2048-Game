@@ -358,10 +358,7 @@ h1 {
 /*footer*/
 footer {
     text-align: center;
-    background-color: #121212;
-    width: 100%;
-    margin-top: 75px;
-    margin-bottom: 25px;
+    margin-bottom: 15px;
 }
 
 a {
@@ -373,6 +370,7 @@ a {
     position: relative;
     right: 2%;
     color: white;
+    transform: scale(0.75);
 }
 
 .fa-envelope {
@@ -383,6 +381,7 @@ a {
     position: relative;
     left: 2%;
     color: white;
+    transform: scale(0.75);
 }
 
 @keyframes rainbow-animation {
@@ -391,7 +390,16 @@ a {
     }
 }
 
-@media (min-width: 1000px) {
+@media (min-width: 1000px) { 
+    h1 {
+        font-size: 180px;
+        height: 180px;   
+    }
+
+    #directions-header {
+        font-size: 35px;
+    }
+
     .main-container {
         flex-direction: row;
     }
@@ -404,7 +412,9 @@ a {
         width: 34%;
     }
 
-
+    footer {
+        margin-top: 75px;
+    }
     
 
 }
