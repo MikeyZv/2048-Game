@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+        <title>2048</title>
+        <link href="2048.css" rel="stylesheet"/>
+        <script src="https://kit.fontawesome.com/6d56778525.js" crossorigin="anonymous"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Genos:ital,wght@0,100..900;1,100..900&family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <div class="header">
+            <div class="title-container">
+                <h1>2048</h1>
+                <div id="directions-header">Merge tiles to reach 2048!</div>
+            </div>
+        </div>
+        <div class="main-container">
+            <div id="gameContainer">
+                <div class="form-popup" id="myForm" hidden>
+                    <form class="form-container">
+                        <input type="text" id="username" placeholder="Enter Username" maxlength="20">
+                        <button class="submit-btn" type="submit">Submit</button>
+                    </form>
+                </div>
+                <canvas id="gameBoard" width="600" height="600"></canvas>
+                <div id="lower-main-container">
+                    <div id="scoreContainer">
+                        <div id="highScoreContainer">
+                            <div id="highScoreText">Best</div>
+                            <div id="highScore">0</div>
+                        </div>
+                        <div id="middle-score-container">
+                            <div id="restartContainer">
+                                <button id="restartBtn">Restart</button>
+                            </div>
+                        </div>
+                        <div id="playerScoreContainer">
+                            <div id="playerScoreText">Score</div>
+                            <div id="playerScore">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="leaderboard">
+                <h2 id="leaderboard-header">Top Ranking Players</h2>
+                <div class="centered-container">
+                    <div class="leaderboard-container"></div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <a href="https://www.linkedin.com/in/miguelzv/">
+                <i class="fa-brands fa-linkedin fa-2xl"></i>
+            </a>
+            <a href="mailto:zmikey16@gmail.com">
+                <i class="fa-regular fa-envelope fa-2xl"></i>
+            </a>
+            <a href="https://github.com/MikeyZv">
+                <i class="fa-brands fa-github fa-2xl"></i>
+            </a>
+        </footer>
+        <script src="2048.js"></script>
+        <script type="module" src="2048-db.js"></script>
+    </body>
+</html>

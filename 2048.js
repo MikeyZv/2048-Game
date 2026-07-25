@@ -1,1101 +1,569 @@
-const gameBoard = document.querySelector("#gameBoard");
-const ctx = gameBoard.getContext("2d");
-const playerhighScore = document.querySelector("#highScore");
-const playerScore = document.querySelector("#playerScore");
-const gameWidth =  gameBoard.width;
-const gameHeight = gameBoard.height;
+/* 2048 — game state and rendering.
+ *
+ * The board is the only source of truth: a 4x4 array holding a tile object or
+ * null per cell. A move is one pure state transition over that array, and the
+ * renderer draws whatever the board currently says. Animation never owns state
+ * — it only interpolates between the cell a tile came from and the one it
+ * landed on — so a dropped frame or a fast key repeat cannot leave the drawing
+ * and the game out of sync.
+ */
+
+"use strict";
+
+const canvas = document.querySelector("#gameBoard");
+const ctx = canvas.getContext("2d");
+const scoreLabel = document.querySelector("#playerScore");
+const highScoreLabel = document.querySelector("#highScore");
 const restartBtn = document.querySelector("#restartBtn");
+const usernameInput = document.querySelector("#username");
+const formPopup = document.querySelector("#myForm");
+const usernameForm = document.querySelector("#myForm form");
 
+const SIZE = 4;
+const CELL = 150;
+const BOARD_PX = SIZE * CELL; // canvas drawing buffer is 600x600
 
-class Tile {
-    value;
-    color;
-    x;
-    y;
-    height = 150;
-    width = 150;
+// A move plays as a slide followed by a short pop on whatever was created.
+const SLIDE_MS = 100;
+const POP_MS = 80;
+const MOVE_MS = SLIDE_MS + POP_MS;
 
-    constructor(value, color, x, y) {
-        this.value = value;
-        this.color = color;
-        this.x = x;
-        this.y = y;
-    }
+const HIGH_SCORE_KEY = "2048-high-score";
 
-    drawTile() {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-    }
-    
-    clearTile() {
-        ctx.clearRect(this.x, this.y, this.width, this.height);
-    }
+// Game over screen, in board units. FORM_HEIGHT is the one number shared with
+// 2048.css: field + gap + button, which .form-container sizes as
+// 7.5cqw + 2.5cqw + 6.5cqw of the same 600-unit board.
+const TITLE_SIZE = 80;
+const NOTE_SIZE = 25;
+const TITLE_TO_NOTE = 10;
+const NOTE_TO_FORM = 26;
+const FORM_HEIGHT = 99;
 
-    drawValue() {
-        ctx.font = "550 50px 'Genos', sans-serif";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.fillText(this.value, this.x + 75, this.y + 85);
-    }
-    
+const TILE_COLORS = {
+    2: "#2ecc71",
+    4: "#27ae60",
+    8: "#f1c40f",
+    16: "#f39c12",
+    32: "#e67e22",
+    64: "#d35400",
+    128: "#e74c3c",
+    256: "#c0392b",
+    512: "#3498db",
+    1024: "#1abc9c",
+    2048: "#8e44ad",
+    4096: "#9b59b6",
+    8192: "#6c3483",
+};
+const BEYOND_COLOR = "#5b2c6f"; // anything past the table still renders
+
+const DIRECTIONS = {
+    up: { row: -1, col: 0 },
+    down: { row: 1, col: 0 },
+    left: { row: 0, col: -1 },
+    right: { row: 0, col: 1 },
 };
 
-//stops scrolling from key inputs
-window.addEventListener("keydown", function(e) {
-    if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code) > -1) {
-        e.preventDefault();
-    }
-}, false);
+const KEY_DIRECTIONS = {
+    arrowup: "up", w: "up",
+    arrowdown: "down", s: "down",
+    arrowleft: "left", a: "left",
+    arrowright: "right", d: "right",
+};
 
-let tiles = [];
-let grid = [[{x:0, y:0, taken: 0, value: 1}, {x:150, y:0, taken: 0, value: 1}, {x:300, y:0, taken: 0, value: 1}, {x:450, y:0, taken: 0, value: 1}],
-            [{x:0, y:150, taken: 0, value: 1}, {x:150, y:150, taken: 0, value: 1}, {x:300, y:150, taken: 0, value: 1}, {x:450, y:150, taken: 0, value: 1}],
-            [{x:0, y:300, taken: 0, value: 1}, {x:150, y:300, taken: 0, value: 1}, {x:300, y:300, taken: 0, value: 1}, {x:450, y:300, taken: 0, value: 1}],
-            [{x:0, y:450, taken: 0, value: 1}, {x:150, y:450, taken: 0, value: 1}, {x:300, y:450, taken: 0, value: 1}, {x:450, y:450, taken: 0, value: 1}]];
-let mergePossible;
-let tileMoved = false;
-let tileMerged = false;
+// Keys that would otherwise scroll the page out from under the board.
+const SCROLL_KEYS = new Set(["arrowup", "arrowdown", "arrowleft", "arrowright", " "]);
+
+// Swipes are judged on the dominant axis.
+const SWIPE_MIN_PX = 30;
+const SWIPE_MAX_MS = 1000;
+
+let board = emptyBoard();
 let score = 0;
-let highScore = 0;
+let highScore = loadHighScore();
+let playerName = "";
+let gameOver = false;
+let scoreSubmitted = false;
+let gameOverNote = ""; // subtitle under [GAME OVER]
+let frameId = 0; // 0 means idle; non-zero means a move is animating
+let animationStart = 0;
 
-//mobile variables
-var swipeDir;
-var startX;
-var startY;
-var distX;
-var distY;
-var threshold = 100;
-var restraint = 100;
-var allowedTime = 300;
-var elapsedTime;
-var startTime;
+/* ---------- board helpers ---------- */
 
-//mobile touch listeners
-gameBoard.addEventListener('touchstart', function(e){
-    var touchobj = e.changedTouches[0];
-    startX = touchobj.pageX;
-    startY = touchobj.pageY;
-    startTime = new Date().getTime();
-    e.preventDefault();
-}, false)
-    
-gameBoard.addEventListener("touchmove", function(e){
-    e.preventDefault();
-}, false);
-    
-gameBoard.addEventListener("touchend", handleEnd, false);
+function emptyBoard() {
+    return Array.from({ length: SIZE }, () => new Array(SIZE).fill(null));
+}
 
-function handleEnd(evt) {
-    var touchobj = evt.changedTouches[0];
-    distX = touchobj.pageX - startX;
-    distY = touchobj.pageY - startY;
-    elapsedTime = new Date().getTime() - startTime;
-    if (elapsedTime <= allowedTime) {
-        if (Math.abs(distX) >= threshold && Math.abs(distY) <= restraint) {
-            swipeDir = (distX < 0)? "left" : "right";
-        } else if (Math.abs(distY) >= threshold && Math.abs(distX) <= restraint) {
-            swipeDir = (distY < 0)? "up" : "down";
-        }
-    }
-    
-    handleswipe(swipeDir);
-    evt.preventDefault();
-};
+function inBounds(row, col) {
+    return row >= 0 && row < SIZE && col >= 0 && col < SIZE;
+}
 
-//prevents page from refreshing when submitting form
-var form = document.getElementById("myForm");
-form.addEventListener('submit', handleForm);
-function handleForm(event) { 
-    event.preventDefault(); 
-};
-
-function start() {
-    if(document.getElementById("username").value.length > 0) {
-        closeForm();
-        window.addEventListener("keydown", moveBox);
-        restartBtn.addEventListener("click", restartGame);
-        randomStart();
-    }
-};
-
-//randomly places two tiles on the board at the beginning of the game but they can't overlap
-function randomStart() {
-    randomIndex1A = Math.floor(Math.random() * 4);
-    randomIndex1B = Math.floor(Math.random() * 4);
-
-    randomIndex2A = Math.floor(Math.random() * 4);
-    randomIndex2B = Math.floor(Math.random() * 4);
-    
-    while ((grid[randomIndex1A][randomIndex1B].x == grid[randomIndex2A][randomIndex2B].x) && (grid[randomIndex1A][randomIndex1B].y == grid[randomIndex2A][randomIndex2B].y)) {
-        randomIndex1A = Math.floor(Math.random() * 4);
-        randomIndex1B = Math.floor(Math.random() * 4);
-    }
-
-    let firstTile = new Tile(2, "#2ecc71", grid[randomIndex1A][randomIndex1B].x, grid[randomIndex1A][randomIndex1B].y);
-    let secondTile = new Tile(2, "#2ecc71", grid[randomIndex2A][randomIndex2B].x, grid[randomIndex2A][randomIndex2B].y);
-
-    grid[randomIndex1A][randomIndex1B].value = 2;
-    grid[randomIndex2A][randomIndex2B].value = 2;
-    grid[randomIndex1A][randomIndex1B].taken = 1;
-    grid[randomIndex2A][randomIndex2B].taken = 1;
-
-    tiles.push(firstTile);
-    tiles.push(secondTile);
-
-    tiles[0].drawTile();
-    tiles[1].drawTile();
-    tiles[0].drawValue();
-    tiles[1].drawValue();
-};
-
-//moves tiles
-function moveDown() {
-    for (let i = 0; i < 4; i++) { //begins at first column
-        for (let j = 2; j > -1; j--) { //begins at third row
-            for (let k = 0; k < tiles.length; k++) { //traverse through tile array
-                if ((grid[j][i].x == tiles[k].x) && (grid[j][i].y == tiles[k].y)) { //if grid coordinates equal tile coordinates
-                    if (j == 2) { //row 3
-                        if (grid[j+1][i].taken == 0) { //if gridbox in row 3 is empty
-                            grid[j+1][i].taken = grid[j][i].taken; //gridbox in row 4 is now taken
-                            grid[j][i].taken = 0; //sets current gridbox taken back to 0 meaning 'empty'
-                            grid[j+1][i].value = grid[j][i].value; //updates gridbox value in row 4 with current gridbox value
-                            grid[j][i].value = 1; //sets current gridbox value back to 1
-                            moveDownAnimation(grid[j+1][i].x, grid[j+1][i].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true; //tile successfully moved
-                        }
-                    } else if (j == 1) { //row 2
-                        if (grid[j+2][i].taken == 0) {
-                            grid[j+2][i].taken = grid[j][i].taken;
-                            grid[j][i].taken = 0;
-                            grid[j+2][i].value = grid[j][i].value;
-                            grid[j][i].value = 1;
-                            moveDownAnimation(grid[j+2][i].x, grid[j+2][i].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        } else if (grid[j+1][i].taken == 0) {
-                            grid[j+1][i].taken = grid[j][i].taken;
-                            grid[j][i].taken = 0;
-                            grid[j+1][i].value = grid[j][i].value;
-                            grid[j][i].value = 1;
-                            moveDownAnimation(grid[j+1][i].x, grid[j+1][i].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        }
-                    } else if (j == 0) { //row 1
-                        if (grid[j+3][i].taken == 0) {
-                            grid[j+3][i].taken = grid[j][i].taken;
-                            grid[j][i].taken = 0;
-                            grid[j+3][i].value = grid[j][i].value;
-                            grid[j][i].value = 1;
-                            moveDownAnimation(grid[j+3][i].x, grid[j+3][i].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        } else if (grid[j+2][i].taken == 0) {
-                            grid[j+2][i].taken = grid[j][i].taken;
-                            grid[j][i].taken = 0;
-                            grid[j+2][i].value = grid[j][i].value;
-                            grid[j][i].value = 1;
-                            moveDownAnimation(grid[j+2][i].x, grid[j+2][i].y, k); 
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        } else if (grid[j+1][i].taken == 0) {
-                            grid[j+1][i].taken = grid[j][i].taken;
-                            grid[j][i].taken = 0;
-                            grid[j+1][i].value = grid[j][i].value;
-                            grid[j][i].value = 1;
-                            moveDownAnimation(grid[j+1][i].x, grid[j+1][i].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        }
-                    }
-                }
-            }
-        }
-    }
-};
-
-function moveUp() {
-    for (let i = 0; i < 4; i++) {
-        for (let j = 1; j < 4; j++) {
-            for (let k = 0; k < tiles.length; k++) {
-                if ((grid[j][i].x == tiles[k].x) && (grid[j][i].y == tiles[k].y)) {
-                    if (j == 1) {
-                        if (grid[j-1][i].taken == 0) {
-                            grid[j-1][i].taken = grid[j][i].taken;
-                            grid[j][i].taken = 0;
-                            grid[j-1][i].value = grid[j][i].value;
-                            grid[j][i].value = 1;
-                            moveUpAnimation(grid[j-1][i].x, grid[j-1][i].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        }
-                    } else if (j == 2) {
-                        if (grid[j-2][i].taken == 0) {
-                            grid[j-2][i].taken = grid[j][i].taken;
-                            grid[j][i].taken = 0;
-                            grid[j-2][i].value = grid[j][i].value;
-                            grid[j][i].value = 1;
-                            moveUpAnimation(grid[j-2][i].x, grid[j-2][i].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        } else if (grid[j-1][i].taken == 0) {
-                            grid[j-1][i].taken = grid[j][i].taken;
-                            grid[j][i].taken = 0;
-                            grid[j-1][i].value = grid[j][i].value;
-                            grid[j][i].value = 1;
-                            moveUpAnimation(grid[j-1][i].x, grid[j-1][i].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        }
-                    } else if (j == 3) {
-                        if (grid[j-3][i].taken == 0) {
-                            grid[j-3][i].taken = grid[j][i].taken;
-                            grid[j][i].taken = 0;
-                            grid[j-3][i].value = grid[j][i].value;
-                            grid[j][i].value = 1;
-                            moveUpAnimation(grid[j-3][i].x, grid[j-3][i].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        } else if (grid[j-2][i].taken == 0) {
-                            grid[j-2][i].taken = grid[j][i].taken;
-                            grid[j][i].taken = 0;
-                            grid[j-2][i].value = grid[j][i].value;
-                            grid[j][i].value = 1;
-                            moveUpAnimation(grid[j-2][i].x, grid[j-2][i].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        } else if (grid[j-1][i].taken == 0) {
-                            grid[j-1][i].taken = grid[j][i].taken;
-                            grid[j][i].taken = 0;
-                            grid[j-1][i].value = grid[j][i].value;
-                            grid[j][i].value = 1;
-                            moveUpAnimation(grid[j-1][i].x, grid[j-1][i].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        }
-                    }
-                }
-            }
-        }
-    }
-};
-
-function moveLeft() {
-    for (let i = 0; i < 4; i++) {
-        for (let j = 1; j < 4; j++) {
-            for (let k = 0; k < tiles.length; k++) {
-                if ((grid[i][j].x == tiles[k].x) && (grid[i][j].y == tiles[k].y)) {
-                    if (j == 1) {
-                        if (grid[i][j-1].taken == 0) {
-                            grid[i][j-1].taken = grid[i][j].taken;
-                            grid[i][j].taken = 0;
-                            grid[i][j-1].value = grid[i][j].value;
-                            grid[i][j].value = 1;
-                            moveLeftAnimation(grid[i][j-1].x, grid[i][j-1].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        }
-                    } else if (j == 2) {
-                        if (grid[i][j-2].taken == 0) {
-                            grid[i][j-2].taken = grid[i][j].taken;
-                            grid[i][j].taken = 0;
-                            grid[i][j-2].value = grid[i][j].value;
-                            grid[i][j].value = 1;
-                            moveLeftAnimation(grid[i][j-2].x, grid[i][j-2].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        } else if (grid[i][j-1].taken == 0) {
-                            grid[i][j-1].taken = grid[i][j].taken;
-                            grid[i][j].taken = 0;
-                            grid[i][j-1].value = grid[i][j].value;
-                            grid[i][j].value = 1;
-                            moveLeftAnimation(grid[i][j-1].x, grid[i][j-1].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        }
-                    } else if (j == 3) {
-                        if (grid[i][j-3].taken == 0) {
-                            grid[i][j-3].taken = grid[i][j].taken;
-                            grid[i][j].taken = 0;
-                            grid[i][j-3].value = grid[i][j].value;
-                            grid[i][j].value = 1;
-                            moveLeftAnimation(grid[i][j-3].x, grid[i][j-3].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        } else if (grid[i][j-2].taken == 0) {
-                            grid[i][j-2].taken = grid[i][j].taken;
-                            grid[i][j].taken = 0;
-                            grid[i][j-2].value = grid[i][j].value;
-                            grid[i][j].value = 1;
-                            moveLeftAnimation(grid[i][j-2].x, grid[i][j-2].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        } else if (grid[i][j-1].taken == 0) {
-                            grid[i][j-1].taken = grid[i][j].taken;
-                            grid[i][j].taken = 0;
-                            grid[i][j-1].value = grid[i][j].value;
-                            grid[i][j].value = 1;
-                            moveLeftAnimation(grid[i][j-1].x, grid[i][j-1].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        }
-                    }
-                }
-            }
-        }
-    }
-};
-
-function moveRight() {
-    for (let i = 0; i < 4; i++) {
-        for (let j = 2; j > -1; j--) {
-            for (let k = 0; k < tiles.length; k++) {
-                if ((grid[i][j].x == tiles[k].x) && (grid[i][j].y == tiles[k].y)) {
-                    if (j == 2) {
-                        if (grid[i][j+1].taken == 0) {
-                            grid[i][j+1].taken = grid[i][j].taken;
-                            grid[i][j].taken = 0;
-                            grid[i][j+1].value = grid[i][j].value;
-                            grid[i][j].value = 1;
-                            moveRightAnimation(grid[i][j+1].x, grid[i][j+1].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        }
-                    } else if (j == 1) {
-                        if (grid[i][j+2].taken == 0) {
-                            grid[i][j+2].taken = grid[i][j].taken;
-                            grid[i][j].taken = 0;
-                            grid[i][j+2].value = grid[i][j].value;
-                            grid[i][j].value = 1;
-                            moveRightAnimation(grid[i][j+2].x, grid[i][j+2].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        } else if (grid[i][j+1].taken == 0) {
-                            grid[i][j+1].taken = grid[i][j].taken;
-                            grid[i][j].taken = 0;
-                            grid[i][j+1].value = grid[i][j].value;
-                            grid[i][j].value = 1;
-                            moveRightAnimation(grid[i][j+1].x, grid[i][j+1].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        }
-                    } else if (j == 0) {
-                        if (grid[i][j+3].taken == 0) {
-                            grid[i][j+3].taken = grid[i][j].taken;
-                            grid[i][j].taken = 0;
-                            grid[i][j+3].value = grid[i][j].value;
-                            grid[i][j].value = 1;
-                            moveRightAnimation(grid[i][j+3].x, grid[i][j+3].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        } else if (grid[i][j+2].taken == 0) {
-                            grid[i][j+2].taken = grid[i][j].taken;
-                            grid[i][j].taken = 0;
-                            grid[i][j+2].value = grid[i][j].value;
-                            grid[i][j].value = 1;
-                            moveRightAnimation(grid[i][j+2].x, grid[i][j+2].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        } else if (grid[i][j+1].taken == 0) {
-                            grid[i][j+1].taken = grid[i][j].taken;
-                            grid[i][j].taken = 0;
-                            grid[i][j+1].value = grid[i][j].value;
-                            grid[i][j].value = 1;
-                            moveRightAnimation(grid[i][j+1].x, grid[i][j+1].y, k);
-                            tiles[k].clearTile();
-                            tileMoved = true;
-                        }
-                    }
-                }
-            }
-        }
-    }
-};
-
-//merges tiles if possible
-function mergeDownTiles() {
-    for (let i = 0; i < 4; i++) { //begins at first column
-        for (let j = 2; j > -1; j--) { //begins at third row
-            for (let k = 0; k < tiles.length; k++) { //traverses through tile array
-                if ((grid[j][i].x == tiles[k].x) && (grid[j][i].y == tiles[k].y)) { //if gridbox coordinates equal tile coordinates
-                    if (grid[j+1][i].taken == 1) { //if gridbox is taken in row below current gridbox 
-                        if (grid[j][i].value == grid[j+1][i].value) { //if gridbox value is the same as the gridbox value below it
-                            tiles[k].clearTile(); //clear current tile drawing
-                            tiles.splice(k, 1); //delete current tile from array
-                            grid[j][i].taken = 0; //current gridbox is now available
-                            grid[j+1][i].value *= 2; //gridbox value below current gridbox has now doubled
-                            grid[j][i].value = 1; //current gridbox value is now 1
-                            score += grid[j+1][i].value; //increase player score by new gridbox value
-                            tileMerged = true; //tile successfully merged
-                        }
-                    }
-                }
-            }
-        }
-    }
-};
-
-function mergeUpTiles() {
-    for (let i = 0; i < 4; i++) {
-        for (let j = 1; j < 4; j++) {
-            for (let k = 0; k < tiles.length; k++) {
-                if ((grid[j][i].x == tiles[k].x) && (grid[j][i].y == tiles[k].y)) {
-                    if (grid[j-1][i].taken == 1) {
-                        if (grid[j][i].value == grid[j-1][i].value) {
-                            tiles[k].clearTile();
-                            tiles.splice(k, 1);
-                            grid[j][i].taken = 0;
-                            grid[j-1][i].value *= 2;
-                            grid[j][i].value = 1;
-                            score += grid[j-1][i].value;
-                            tileMerged = true;
-                        }
-                    }
-                }
-            }
-        }
-    }
-};
-
-function mergeRightTiles() {
-    for (let i = 0; i < 4; i++) {
-        for (let j = 2; j > -1; j--) {
-            for (let k = 0; k < tiles.length; k++) {
-                if ((grid[i][j].x == tiles[k].x) && (grid[i][j].y == tiles[k].y)) {
-                    if (grid[i][j+1].taken == 1) {
-                        if (grid[i][j].value == grid[i][j+1].value) {
-                            tiles[k].clearTile();
-                            tiles.splice(k, 1);
-                            grid[i][j].taken = 0;
-                            grid[i][j+1].value *= 2;
-                            grid[i][j].value = 1;
-                            score += grid[i][j+1].value;
-                            tileMerged = true;
-                        } 
-                    }
-                }
-            }
-        }
-    }
-};
-
-function mergeLeftTiles() {
-    for (let i = 0; i < 4; i++) {
-        for (let j = 1; j < 4; j++) {
-            for (let k = 0; k < tiles.length; k++) {
-                if ((grid[i][j].x == tiles[k].x) && (grid[i][j].y == tiles[k].y)) {
-                    if (grid[i][j-1].taken == 1) {
-                        if (grid[i][j].value == grid[i][j-1].value) {
-                            tiles[k].clearTile();
-                            tiles.splice(k, 1);
-                            grid[i][j].taken = 0;
-                            grid[i][j-1].value *= 2;
-                            grid[i][j].value = 1;
-                            score += grid[i][j-1].value;
-                            tileMerged = true;
-                        } 
-                    }
-                }
-            }
-        }
-    }
-};
-
-//tile animations
-function moveDownAnimation(x, y, index) {
-    let id = null;
-    clearInterval(id);
-    id = setInterval(frame, 4);
-    function frame() {
-        if (tiles[index].y == y) {
-            clearInterval(id);
-        } else {
-            tiles[index].clearTile();
-            tiles[index].y += 50;
-            tiles[index].drawTile();
-            tiles[index].drawValue();
+function forEachTile(callback) {
+    for (let row = 0; row < SIZE; row++) {
+        for (let col = 0; col < SIZE; col++) {
+            const tile = board[row][col];
+            if (tile) callback(tile, row, col);
         }
     }
 }
 
-function moveUpAnimation(x, y, index) {
-    let id = null;
-    clearInterval(id);
-    id = setInterval(frame, 4);
-    function frame() {
-        if (tiles[index].y == y) {
-            clearInterval(id);
+function createTile(value, row, col, isNew) {
+    return {
+        value,
+        row,
+        col,
+        fromRow: row,
+        fromCol: col,
+        isNew: Boolean(isNew),
+        mergedFrom: null, // the two tiles this one was made from, for animation
+    };
+}
+
+function emptyCells() {
+    const cells = [];
+    for (let row = 0; row < SIZE; row++) {
+        for (let col = 0; col < SIZE; col++) {
+            if (!board[row][col]) cells.push({ row, col });
+        }
+    }
+    return cells;
+}
+
+// Picks uniformly from the free cells
+function spawnTile() {
+    const cells = emptyCells();
+    if (cells.length === 0) return;
+    const { row, col } = cells[Math.floor(Math.random() * cells.length)];
+    board[row][col] = createTile(Math.random() < 0.1 ? 4 : 2, row, col, true);
+}
+
+/* ---------- move logic ---------- */
+
+// Tiles furthest along the direction of travel have to move first, otherwise
+// they block the ones behind them.
+function traversalOrder(vector) {
+    const rows = [0, 1, 2, 3];
+    const cols = [0, 1, 2, 3];
+    if (vector.row > 0) rows.reverse();
+    if (vector.col > 0) cols.reverse();
+    return { rows, cols };
+}
+
+// Walks from a cell until the board edge or an occupied cell: returns the last
+// free cell reached and whatever tile stopped the walk.
+function scan(row, col, vector) {
+    let landingRow = row;
+    let landingCol = col;
+    let nextRow = row + vector.row;
+    let nextCol = col + vector.col;
+
+    while (inBounds(nextRow, nextCol) && !board[nextRow][nextCol]) {
+        landingRow = nextRow;
+        landingCol = nextCol;
+        nextRow += vector.row;
+        nextCol += vector.col;
+    }
+
+    return {
+        landingRow,
+        landingCol,
+        blocker: inBounds(nextRow, nextCol) ? board[nextRow][nextCol] : null,
+    };
+}
+
+// Applies one move. Returns true if anything actually changed, which is what
+// decides whether the turn counts and a new tile spawns.
+function move(directionName) {
+    const vector = DIRECTIONS[directionName];
+    const { rows, cols } = traversalOrder(vector);
+    let moved = false;
+
+    // Reset per-move animation bookkeeping before anything shifts.
+    forEachTile((tile, row, col) => {
+        tile.fromRow = row;
+        tile.fromCol = col;
+        tile.isNew = false;
+        tile.mergedFrom = null;
+    });
+
+    for (const row of rows) {
+        for (const col of cols) {
+            const tile = board[row][col];
+            if (!tile) continue;
+
+            const { landingRow, landingCol, blocker } = scan(row, col, vector);
+
+            // A tile created by a merge this turn still has mergedFrom set, so
+            // it cannot merge again — that is the rule that keeps 2,2,4 from
+            // collapsing to 8 in a single move.
+            if (blocker && blocker.value === tile.value && !blocker.mergedFrom) {
+                const merged = createTile(tile.value * 2, blocker.row, blocker.col, false);
+                merged.mergedFrom = [blocker, tile];
+
+                tile.row = blocker.row;
+                tile.col = blocker.col;
+
+                board[blocker.row][blocker.col] = merged;
+                board[row][col] = null;
+
+                score += merged.value;
+                moved = true;
+            } else if (landingRow !== row || landingCol !== col) {
+                board[landingRow][landingCol] = tile;
+                board[row][col] = null;
+                tile.row = landingRow;
+                tile.col = landingCol;
+                moved = true;
+            }
+        }
+    }
+
+    return moved;
+}
+
+// Game over is exactly: no free cell, and no pair of equal neighbours. Checking
+// right and down from every cell covers all adjacencies once.
+function movesAvailable() {
+    for (let row = 0; row < SIZE; row++) {
+        for (let col = 0; col < SIZE; col++) {
+            const tile = board[row][col];
+            if (!tile) return true;
+            const right = col + 1 < SIZE ? board[row][col + 1] : null;
+            const below = row + 1 < SIZE ? board[row + 1][col] : null;
+            if (right && right.value === tile.value) return true;
+            if (below && below.value === tile.value) return true;
+        }
+    }
+    return false;
+}
+
+/* ---------- turn handling ---------- */
+
+// A key may land while the previous move is still animating.
+function handleMove(directionName) {
+    if (gameOver) return;
+
+    if (frameId !== 0) {
+        cancelAnimation();
+        render(MOVE_MS); // land the move on screen before starting the next
+    }
+
+    if (!move(directionName)) return; // nothing shifted: not a turn
+
+    spawnTile();
+    updateScoreboard();
+    if (!movesAvailable()) gameOver = true;
+    startAnimation();
+}
+
+/* ---------- rendering ---------- */
+
+function colorFor(value) {
+    return TILE_COLORS[value] || BEYOND_COLOR;
+}
+
+function fontSizeFor(value) {
+    if (value < 1000) return 50;
+    if (value < 10000) return 42;
+    return 34;
+}
+
+function drawTile(value, row, col, scale) {
+    const size = CELL * scale;
+    const x = col * CELL;
+    const y = row * CELL;
+    const inset = (CELL - size) / 2;
+
+    ctx.fillStyle = colorFor(value);
+    ctx.fillRect(x + inset, y + inset, size, size);
+
+    ctx.fillStyle = "white";
+    ctx.font = `550 ${Math.round(fontSizeFor(value) * scale)}px 'Genos', sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(value, x + CELL / 2, y + CELL / 2);
+}
+
+function lerp(from, to, t) {
+    return from + (to - from) * t;
+}
+
+function easeOut(t) {
+    return t * (2 - t);
+}
+
+// One full redraw per frame. Passing MOVE_MS renders the settled board.
+function render(elapsed) {
+    ctx.clearRect(0, 0, BOARD_PX, BOARD_PX);
+
+    const slide = easeOut(Math.min(elapsed / SLIDE_MS, 1));
+    const pop = Math.min(Math.max((elapsed - SLIDE_MS) / POP_MS, 0), 1);
+
+    forEachTile((tile) => {
+        if (tile.mergedFrom) {
+            if (slide < 1) {
+                // Show the two originals travelling into the same cell.
+                for (const source of tile.mergedFrom) {
+                    drawTile(
+                        source.value,
+                        lerp(source.fromRow, source.row, slide),
+                        lerp(source.fromCol, source.col, slide),
+                        1
+                    );
+                }
+            } else {
+                drawTile(tile.value, tile.row, tile.col, 1 + 0.15 * Math.sin(Math.PI * pop));
+            }
+        } else if (tile.isNew) {
+            if (slide >= 1) drawTile(tile.value, tile.row, tile.col, 0.4 + 0.6 * pop);
         } else {
-            tiles[index].clearTile();
-            tiles[index].x = x;
-            tiles[index].y -= 50;
-            tiles[index].drawTile();
-            tiles[index].drawValue();
+            drawTile(
+                tile.value,
+                lerp(tile.fromRow, tile.row, slide),
+                lerp(tile.fromCol, tile.col, slide),
+                1
+            );
         }
-    }
-};
+    });
+}
 
-function moveLeftAnimation(x, y, index) {
-    let id = null;
-    clearInterval(id);
-    id = setInterval(frame, 4);
-    function frame() {
-        if (tiles[index].x == x) {
-            clearInterval(id);
-        } else {
-            tiles[index].clearTile();
-            tiles[index].x -= 50;
-            tiles[index].y = y;
-            tiles[index].drawTile();
-            tiles[index].drawValue();
-        }
-    }
-};
+function drawGameOver() {
+    render(MOVE_MS);
 
-function moveRightAnimation(x, y, index) {
-    let id = null;
-    clearInterval(id);
-    id = setInterval(frame, 4);
-    function frame() {
-        if (tiles[index].x == x) {
-            clearInterval(id);
-        } else {
-            tiles[index].clearTile();
-            tiles[index].x += 50;
-            tiles[index].y = y;
-            tiles[index].drawTile();
-            tiles[index].drawValue();
-        }
-    }
-};
+    const promptOpen = formPopup.hidden === false;
 
-function updateColors() {
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            for (let k = 0; k < tiles.length; k++) {
-                if ((grid[i][j].x == tiles[k].x) && (grid[i][j].y == tiles[k].y)) {
-                    switch(true) {
-                        case(grid[i][j].value == 2):
-                            tiles[k].color = "#2ecc71";
-                            tiles[k].value = 2;
-                            break;
-                        case(grid[i][j].value == 4):
-                            tiles[k].color = "#27ae60";
-                            tiles[k].value = 4;
-                            break;
-                        case(grid[i][j].value == 8):
-                            tiles[k].color = "#f1c40f";
-                            tiles[k].value = 8;
-                            break;
-                        case(grid[i][j].value == 16):
-                            tiles[k].color = "#f39c12";
-                            tiles[k].value = 16;
-                            break;
-                        case(grid[i][j].value == 32):
-                            tiles[k].color = "#e67e22";
-                            tiles[k].value = 32;
-                            break;
-                        case(grid[i][j].value == 64):
-                            tiles[k].color = "#d35400";
-                            tiles[k].value = 64;
-                            break;
-                        case(grid[i][j].value == 128):
-                            tiles[k].color = "#e74c3c";
-                            tiles[k].value = 128;
-                            break;
-                        case(grid[i][j].value == 256):
-                            tiles[k].color = "#c0392b";
-                            tiles[k].value = 256;
-                            break;
-                        case(grid[i][j].value == 512):
-                            tiles[k].color = "#3498db";
-                            tiles[k].value = 512;
-                            break;
-                        case(grid[i][j].value == 1024):
-                            tiles[k].color = "#1abc9c";
-                            tiles[k].value = 1024;
-                            break;
-                        case(grid[i][j].value == 2048):
-                            tiles[k].color = "#8e44ad";
-                            tiles[k].value = 2048;
-                            break;
-                    }
-                }
-            }
-        }
-    }
-};
+    const heights = [TITLE_SIZE];
+    if (gameOverNote) heights.push(TITLE_TO_NOTE, NOTE_SIZE);
+    if (promptOpen) heights.push(NOTE_TO_FORM, FORM_HEIGHT);
+    const stack = heights.reduce((total, height) => total + height, 0);
 
-function checkTurn() {
-    if ((tileMoved || tileMerged) && (tiles.length < 16)) { //if tile moves or tile merges and the length of tile array is less than 16
-        randomNewTile(); //spawn new tile
-        tileMoved = false; //tile hasn't moved
-        tileMerged = false; //tile hasn't merged
-    }
-};
+    let y = (BOARD_PX - stack) / 2;
 
-//checks all tiles to see if there is one tile with the same value adjacent to it
-function checkSurroundingTiles() {
-    //top to bottom
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 4; j++) {
-            if (i == 0) {
-                if (grid[i+1][j].taken == 1) {
-                    if (grid[i][j].value == grid[i+1][j].value) {
-                        mergePossible = true;
-                    }
-                } else if (grid[i+2][j].taken == 1) {
-                    if (grid[i][j].value == grid[i+2][j].value) {
-                        mergePossible = true;
-                    }
-                } else if (grid[i+3][j].taken == 1) {
-                    if (grid[i][j].value == grid[i+3][j].value) {
-                        mergePossible = true;
-                    }
-                }
-            } else if (i == 1) {
-                if (grid[i+1][j].taken == 1) {
-                    if (grid[i][j].value == grid[i+1][j].value) {
-                        mergePossible = true;
-                    }
-                } else if (grid[i+2][j].taken == 1) {
-                    if (grid[i][j].value == grid[i+2][j].value) {
-                        mergePossible = true;
-                    }
-                }
-            } else if (i == 2) {
-                if (grid[i+1][j].taken == 1) {
-                    if (grid[i][j].value == grid[i+1][j].value) {
-                        mergePossible = true;
-                    }
-                } 
-            }
-        }
-    }
-    //bottom to top
-    for (let i = 3; i > 0; i--) {
-        for (let j = 0; j < 4; j++) {
-            if (i == 3) {
-                if (grid[i-1][j].taken == 1) {
-                    if (grid[i][j].value == grid[i-1][j].value) {
-                        mergePossible = true;
-                    }
-                } else if (grid[i-2][j].taken == 1) {
-                    if (grid[i][j].value == grid[i-2][j].value) {
-                        mergePossible = true;
-                    }
-                } else if (grid[i-3][j].taken == 1) {
-                    if (grid[i][j].value == grid[i-3][j].value) {
-                        mergePossible = true;
-                    }
-                }
-            } else if (i == 2) {
-                if (grid[i-1][j].taken == 1) {
-                    if (grid[i][j].value == grid[i-1][j].value) {
-                        mergePossible = true;
-                    }
-                } else if (grid[i-2][j].taken == 1) {
-                    if (grid[i][j].value == grid[i-2][j].value) {
-                        mergePossible = true;
-                    }
-                }
-            } else if (i == 1) {
-                if (grid[i-1][j].taken == 1) {
-                    if (grid[i][j].value == grid[i-1][j].value) {
-                        mergePossible = true;
-                    }
-                }
-            }
-        }
-    }
-    //left to right
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 3; j++) {
-            if (j == 0) {
-                if (grid[i][j+1].taken == 1) {
-                    if (grid[i][j].value == grid[i][j+1].value) {
-                        mergePossible = true;
-                    } 
-                } else if (grid[i][j+2].taken == 1) {
-                    if (grid[i][j].value == grid[i][j+2].value) {
-                        mergePossible = true;
-                    } 
-                } else if (grid[i][j+3].taken == 1) {
-                    if (grid[i][j].value == grid[i][j+3].value) {
-                        mergePossible = true;
-                    }
-                }
-            } else if (j == 1) {
-                if (grid[i][j+1].taken == 1) {
-                    if (grid[i][j].value == grid[i][j+1].value) {
-                        mergePossible = true;
-                    } 
-                } else if (grid[i][j+2].taken == 1) {
-                    if (grid[i][j].value == grid[i][j+2].value) {
-                        mergePossible = true;
-                    }
-                }
-            } else if (j == 2) {
-                if (grid[i][j+1].taken == 1) {
-                    if (grid[i][j].value == grid[i][j+1].value) {
-                        mergePossible = true;
-                    }
-                }
-            }
-        }
-    }
-    //right to left
-    for (let i = 0; i < 4; i++) {
-        for (let j = 3; j > 0; j--) {
-            if (j == 3) {
-                if (grid[i][j-1].taken == 1) {
-                    if (grid[i][j].value == grid[i][j-1].value) {
-                        mergePossible = true;
-                    }
-                } else if (grid[i][j-2].taken == 1) {
-                    if (grid[i][j].value == grid[i][j-2].value) {
-                        mergePossible = true;
-                    }
-                } else if (grid[i][j-3].taken == 1) {
-                    if (grid[i][j].value == grid[i][j-3].value) {
-                        mergePossible = true;
-                    }
-                }
-            } else if (j == 2) {
-                if (grid[i][j-1].taken == 1) {
-                    if (grid[i][j].value == grid[i][j-1].value) {
-                        mergePossible = true;
-                    } 
-                } else if (grid[i][j-2].taken == 1) {
-                    if (grid[i][j].value == grid[i][j-2].value) {
-                        mergePossible = true;
-                    }
-                }
-            } else if (j == 1) {
-                if (grid[i][j-1].taken == 1) {
-                    if (grid[i][j].value == grid[i][j-1].value) {
-                        mergePossible = true;
-                    }
-                }
-            }
-        }
-    }
-};
+    ctx.fillStyle = "rgba(18, 18, 18, 0.78)";
+    ctx.fillRect(0, 0, BOARD_PX, BOARD_PX);
 
-//draws all tiles on the board
-function drawTiles() {
-    for (let i = 0; i < tiles.length; i++) {
-        tiles[i].drawTile();
-        tiles[i].drawValue();
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    ctx.font = `550 ${TITLE_SIZE}px 'Genos', sans-serif`;
+    ctx.fillText("[GAME OVER]", BOARD_PX / 2, y + TITLE_SIZE / 2);
+    y += TITLE_SIZE;
+
+    if (gameOverNote) {
+        y += TITLE_TO_NOTE;
+        ctx.font = `550 ${NOTE_SIZE}px 'Genos', sans-serif`;
+        ctx.fillText(gameOverNote, BOARD_PX / 2, y + NOTE_SIZE / 2);
+        y += NOTE_SIZE;
     }
-};
 
-function updateScore() {
-    playerScore.textContent = score;
-};
+    if (promptOpen) {
+        y += NOTE_TO_FORM;
+        formPopup.style.setProperty("--form-top", `${(y / BOARD_PX) * 100}%`);
+    }
+}
 
-function checkHighScore() {
-    if (score >= highScore) {
+function startAnimation() {
+    animationStart = performance.now();
+    if (frameId === 0) frameId = requestAnimationFrame(step);
+}
+
+// Animation step: called once per frame by requestAnimationFrame.
+function step(now) {
+    const elapsed = Math.max(now - animationStart, 0);
+    render(Math.min(elapsed, MOVE_MS));
+
+    if (elapsed < MOVE_MS) {
+        frameId = requestAnimationFrame(step);
+        return;
+    }
+
+    frameId = 0;
+    if (gameOver) finishGame();
+}
+
+function cancelAnimation() {
+    if (frameId !== 0) cancelAnimationFrame(frameId);
+    frameId = 0;
+}
+
+/* ---------- score ---------- */
+
+function loadHighScore() {
+    try {
+        return Number(window.localStorage.getItem(HIGH_SCORE_KEY)) || 0;
+    } catch (error) {
+        return 0; // private mode or blocked storage: just keep it in memory
+    }
+}
+
+function saveHighScore(value) {
+    try {
+        window.localStorage.setItem(HIGH_SCORE_KEY, String(value));
+    } catch (error) {
+        /* not worth interrupting the game over */
+    }
+}
+
+function updateScoreboard() {
+    if (score > highScore) {
         highScore = score;
-        playerhighScore.textContent = score;
+        saveHighScore(highScore);
     }
-}; 
+    scoreLabel.textContent = score;
+    highScoreLabel.textContent = highScore;
+}
 
-function checkGameOver() {
-    if ((mergePossible == false) && (tiles.length == 16)) {
-        gameBoard.removeEventListener("touchend", handleEnd);
-        window.removeEventListener("keydown", moveBox);
-        ctx.fillStyle = "white";
-        ctx.font = "550 80px 'Genos', sans-serif";
-        ctx.fillText("[GAME OVER]", gameWidth / 2, gameHeight - 300);
-        ctx.font = "550 25px 'Genos', sans-serif";
-        ctx.fillText("SCORE SUBMITTED", gameWidth / 2, gameHeight - 275);
-        ctx.textAlign = "center";
-        sendData();
+// Hands the finished game to the Supabase layer in 2048-db.js. Guarded so a
+// board that is already over can never submit twice.
+function sendData() {
+    if (scoreSubmitted) return;
+    scoreSubmitted = true;
+
+    if (typeof window.submitScore !== "function") {
+        console.error("Score submission unavailable: 2048-db.js did not load.");
+        return;
     }
-};
+    window.submitScore(playerName, score);
+}
 
-//test function
-function test() {
-    if (!mergePossible) {
-        ctx.font = "30px Courier, monospace";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.fillText("no merge possible", gameWidth / 2, gameHeight - 100);
+// Checks whether the current score qualifies for the leaderboard.
+function scoreQualifies() {
+    if (typeof window.leaderboardQualifies !== "function") return false;
+    try {
+        return window.leaderboardQualifies(score) === true;
+    } catch (error) {
+        console.error("Could not check the leaderboard:", error);
+        return false;
     }
-};
+}
 
-//spawns in a random tile on an available space
-function randomNewTile() {
-    //initial gridspace to spawn new tile
-    randomIndexA = Math.floor(Math.random() * 4);
-    randomIndexB = Math.floor(Math.random() * 4);
-    
-    if (tiles.length < 16) {
-        //rerolls gridspace if initial gridspace is taken
-        while (grid[randomIndexA][randomIndexB].taken == 1) {
-            randomIndexA = Math.floor(Math.random() * 4);
-            randomIndexB = Math.floor(Math.random() * 4);
-        }
-
-        let tileValue = 2;
-        let tileColor = "#2ecc71";
-
-        //10% chance that a tile with value 4 spawns
-        chance = Math.floor(Math.random() * 10);
-        if (chance == 0) {
-            tileValue = 4;
-            tileColor = "#27ae60";
-        }
-        
-        //creates new tile with assigned values and pushes it into tile array
-        let newTile = new Tile(tileValue, tileColor, grid[randomIndexA][randomIndexB].x, grid[randomIndexA][randomIndexB].y);
-        grid[randomIndexA][randomIndexB].value = tileValue;
-        grid[randomIndexA][randomIndexB].taken = 1;
-        tiles.push(newTile);
+function finishGame() {
+    if (scoreQualifies()) {
+        gameOverNote = "YOU MADE THE LEADERBOARD";
+        openForm(); // opened first: drawGameOver lays out around it
+    } else {
+        gameOverNote = "RESTART TO PLAY AGAIN";
     }
-};
+    drawGameOver();
+}
 
-function restartGame() {
-    window.addEventListener("keydown", moveBox);
-    gameBoard.addEventListener("touchend", handleEnd, false);
-    ctx.clearRect(0, 0, gameWidth, gameHeight);
-    tiles = [];
-    grid = [[{x:0, y:0, taken: 0, value: 1}, {x:150, y:0, taken: 0, value: 1}, {x:300, y:0, taken: 0, value: 1}, {x:450, y:0, taken: 0, value: 1}],
-            [{x:0, y:150, taken: 0, value: 1}, {x:150, y:150, taken: 0, value: 1}, {x:300, y:150, taken: 0, value: 1}, {x:450, y:150, taken: 0, value: 1}],
-            [{x:0, y:300, taken: 0, value: 1}, {x:150, y:300, taken: 0, value: 1}, {x:300, y:300, taken: 0, value: 1}, {x:450, y:300, taken: 0, value: 1}],
-            [{x:0, y:450, taken: 0, value: 1}, {x:150, y:450, taken: 0, value: 1}, {x:300, y:450, taken: 0, value: 1}, {x:450, y:450, taken: 0, value: 1}]];
-    mergePossible = false;
-    tileMoved = false;
-    tileMerged = false;
-    checkHighScore();
+// Handles the submission of the player's name after qualifying for the leaderboard.
+function submitName() {
+    const name = usernameInput.value.trim();
+    if (name.length === 0) {
+        usernameInput.focus();
+        return;
+    }
+
+    playerName = name;
+    closeForm();
+    sendData();
+
+    gameOverNote = "SCORE SUBMITTED";
+    drawGameOver();
+}
+
+/* ---------- lifecycle ---------- */
+
+function newGame() {
+    cancelAnimation();
+    closeForm(); // restarting mid-prompt abandons that score rather than sending it
+    board = emptyBoard();
     score = 0;
-    updateScore();
-    randomStart();
-};
+    gameOver = false;
+    scoreSubmitted = false;
+    gameOverNote = "";
 
-//test function
-function color1() {
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            ctx.font = "20px Courier, monospace";
-            ctx.fillStyle = "white";
-            ctx.textAlign = "center";
-            ctx.fillText(grid[i][j].value, grid[i][j].x + 10, grid[i][j].y + 50);
-            ctx.fillText(grid[i][j].taken, grid[i][j].x + 10, grid[i][j].y + 15);
-
-        }
-    }
-};
+    spawnTile();
+    spawnTile();
+    updateScoreboard();
+    startAnimation();
+}
 
 function openForm() {
-    document.getElementById("myForm").style.display = "flex";
-};
+    formPopup.hidden = false;
+    usernameInput.focus();
+}
 
 function closeForm() {
-    document.getElementById("myForm").style.display = "none";
-};
+    formPopup.hidden = true;
+}
 
-//ajax request
-function sendData() {
-    var dataToSend = "username=" + document.getElementById("username").value + "&" + "score=" + score;
-    var xhttp = new XMLHttpRequest();
-    xhttp.open("POST", "includes/scorehandler.inc.php", true);
-    xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    xhttp.send(dataToSend);
-};
+/* ---------- input ---------- */
 
-//desktop controls
-function moveBox(event) {
-    const keyPressed = event.keyCode;
-    const upArrow = 38;
-    const downArrow = 40;
-    const rightArrow = 39;
-    const leftArrow = 37;
-    const upW = 87;
-    const downS = 83;
-    const rightD = 68;
-    const leftA = 65;
+// Listeners are attached once and read the current state, so restarting can
+// never stack duplicate handlers
+window.addEventListener("keydown", (event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
 
-    switch(true) {
-        case(keyPressed == downArrow || keyPressed == downS):
-            window.removeEventListener("keydown", moveBox);
-            mergePossible = false;
-            moveDown();
-            setTimeout(() => {
-                mergeDownTiles();
-                moveDown();
-                setTimeout(() => {
-                    updateColors();
-                    checkTurn();
-                    checkSurroundingTiles()
-                    drawTiles();
-                    updateScore();
-                    checkHighScore();
+    if (document.activeElement === usernameInput) return;
 
-                    // test();
-                    // color1();
-                    window.addEventListener("keydown", moveBox);
-                    checkGameOver();
-                }, 24);
-            }, 48);
+    const key = event.key.toLowerCase();
+    if (SCROLL_KEYS.has(key)) event.preventDefault();
 
-            break;
-        case(keyPressed == upArrow || keyPressed == upW):
-            window.removeEventListener("keydown", moveBox);
-            mergePossible = false;
-            moveUp();
-            setTimeout(() => {
-                mergeUpTiles();
-                moveUp();
-                setTimeout(() => {
-                    updateColors();
-                    checkTurn();
-                    checkSurroundingTiles()
-                    drawTiles();
-                    updateScore();
-                    checkHighScore();
+    const direction = KEY_DIRECTIONS[key];
+    if (direction) handleMove(direction);
+}, { passive: false });
 
-                    // test();
-                    // color1();
-                    window.addEventListener("keydown", moveBox);
-                    checkGameOver();
-                }, 24);
-            }, 48);
+let touchStart = null;
 
-            break;
-        case(keyPressed == rightArrow || keyPressed == rightD):
-            window.removeEventListener("keydown", moveBox);
-            mergePossible = false;
-            moveRight();
-            setTimeout(() => {
-                mergeRightTiles();
-                moveRight();
-                setTimeout(() => {
-                    updateColors();
-                    checkTurn();
-                    checkSurroundingTiles()
-                    drawTiles();
-                    updateScore();
-                    checkHighScore();
-
-                    // test();
-                    // color1();
-                    window.addEventListener("keydown", moveBox);
-                    checkGameOver();
-                }, 24);
-            }, 48);
-
-            break;
-        case(keyPressed == leftArrow || keyPressed == leftA):
-            window.removeEventListener("keydown", moveBox);
-            mergePossible = false;
-            moveLeft();
-            setTimeout(() => {
-                mergeLeftTiles();
-                moveLeft();
-                setTimeout(() => {
-                    updateColors();
-                    checkTurn();
-                    checkSurroundingTiles()
-                    drawTiles();
-                    updateScore();
-                    checkHighScore();
-
-                    // test();
-                    // color1();
-                    window.addEventListener("keydown", moveBox);
-                    checkGameOver();
-                }, 24);
-            }, 48);
-
-            break;
-        }
-
-};
-
-//mobile controls
-function handleswipe(swipeDir) {
-    if (swipeDir == "left") {
-        mergePossible = false;
-        moveLeft();
-        setTimeout(() => {
-            mergeLeftTiles();
-            moveLeft();
-            setTimeout(() => {
-                updateColors();
-                checkTurn();
-                checkSurroundingTiles()
-                drawTiles();
-                updateScore();
-                checkHighScore();
-
-                // test();
-                // color1();
-                gameBoard.addEventListener("touchend", handleEnd, false);
-                checkGameOver();
-            }, 24);
-        }, 48);
-    } else if (swipeDir == "right") {
-        mergePossible = false;
-        moveRight();
-        setTimeout(() => {
-            mergeRightTiles();
-            moveRight();
-            setTimeout(() => {
-                updateColors();
-                checkTurn();
-                checkSurroundingTiles()
-                drawTiles();
-                updateScore();
-                checkHighScore();
-
-                // test();
-                // color1();
-                gameBoard.addEventListener("touchend", handleEnd, false);
-                checkGameOver();
-            }, 24);
-        }, 48);
-    } else if (swipeDir == "up") {
-        mergePossible = false;
-        moveUp();
-        setTimeout(() => {
-            mergeUpTiles();
-            moveUp();
-            setTimeout(() => {
-                updateColors();
-                checkTurn();
-                checkSurroundingTiles()
-                drawTiles();
-                updateScore();
-                checkHighScore();
-
-                // test();
-                // color1();
-                gameBoard.addEventListener("touchend", handleEnd, false);
-                checkGameOver();
-            }, 24);
-        }, 48);
-    } else if (swipeDir == "down") {
-        mergePossible = false;
-        moveDown();
-        setTimeout(() => {
-            mergeDownTiles();
-            moveDown();
-            setTimeout(() => {
-                updateColors();
-                checkTurn();
-                checkSurroundingTiles()
-                drawTiles();
-                updateScore();
-                checkHighScore();
-
-                // test();
-                // color1();
-                gameBoard.addEventListener("touchend", handleEnd, false);
-                checkGameOver();
-            }, 24);
-        }, 48);
+canvas.addEventListener("touchstart", (event) => {
+    // touches counts every finger on the screen; changedTouches would only
+    // hold the newest one, and so could not tell a pinch from a swipe.
+    if (event.touches.length !== 1) {
+        touchStart = null; // multi-touch (pinch/zoom) is not a swipe
+        return;
     }
-};
+    const touch = event.touches[0];
+    touchStart = { x: touch.clientX, y: touch.clientY, time: performance.now() };
+    event.preventDefault();
+}, { passive: false });
+
+canvas.addEventListener("touchmove", (event) => {
+    event.preventDefault();
+}, { passive: false });
+
+canvas.addEventListener("touchend", (event) => {
+    event.preventDefault();
+
+    const origin = touchStart;
+    touchStart = null; // cleared every time, so a tap can't replay the last swipe
+    if (!origin) return;
+    if (performance.now() - origin.time > SWIPE_MAX_MS) return;
+
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - origin.x;
+    const dy = touch.clientY - origin.y;
+
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_MIN_PX) return;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+        handleMove(dx < 0 ? "left" : "right");
+    } else {
+        handleMove(dy < 0 ? "up" : "down");
+    }
+}, { passive: false });
+
+canvas.addEventListener("touchcancel", () => {
+    touchStart = null;
+});
+
+restartBtn.addEventListener("click", newGame);
+
+if (usernameForm) {
+    usernameForm.addEventListener("submit", (event) => {
+        event.preventDefault(); // keep the page from reloading
+        submitName();
+    });
+}
+
+// Wait for fonts to be ready before the first render to avoid layout shifts.
+if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+        if (frameId !== 0) return; // a running animation repaints anyway
+        if (gameOver) drawGameOver();
+        else render(MOVE_MS);
+    });
+}
+
+newGame();

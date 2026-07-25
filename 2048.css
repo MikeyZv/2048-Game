@@ -1,13 +1,14 @@
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 body {
     background-color: #121212;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    min-height: 100vh;
 }
 
 .header {
@@ -29,11 +30,11 @@ body {
 h1 {
     text-align: center;
     font-size: 140px;
+    line-height: 1;
     font-family: "Genos", sans-serif;
     background-color: #121212;
     color: white;
     width: 100%;
-    height: 140px;
 }
 
 #directions-header {
@@ -48,27 +49,11 @@ h1 {
 .main-container {
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    align-items: center;
+    gap: 40px;
+    padding: 0 20px;
     background-color: #121212;
     width: 100%;
-}
-
-/*recent games*/
-#recent-games {
-    background-color: #121212;
-    width: 100%;
-}
-
-#recent-games-header {
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    font-family: "Genos", sans-serif;
-    font-weight: 550;
-    font-size: 35px;
-    background-color: #121212;
-    color: white;
-
 }
 
 .centered-container {
@@ -77,48 +62,15 @@ h1 {
     background-color: #121212;
 }
 
-.recent-games-container {
-    background-color: #121212;
-    height: 350px;
-    width: 90%;
-}
-
-.playerNamesRecentGames {
-    font-family: "Genos", sans-serif;
-    font-weight: 550;
-    font-size: 15px;
-    background-color: #121212;
-    width: 40%;
-    display: inline-flex;
-    color: white;
-}
-
-.playerScoresRecentGames {
-    font-family: "Genos", sans-serif;
-    font-weight: 550;
-    font-size: 15px;
-    background-color: #121212;
-    display: inline-flex;
-    justify-content: flex-end;
-    width: 15%;
-    color: white;
-}
-
-.played_atRecentGames {
-    font-family: "Genos", sans-serif;
-    font-weight: 550;
-    font-size: 15px;
-    background-color: #121212;
-    display: inline-flex;
-    justify-content: flex-end;
-    width: 45%;
-    color: white;
-}
-
 /*gameboard*/
 #gameContainer {
+    /* Positioning context for the username popup, which is absolute, and the
+       size reference for the cqw units it uses to track the canvas type. */
+    position: relative;
+    container-type: inline-size;
     background-color: #121212;
     width: 100%;
+    max-width: 600px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -126,68 +78,81 @@ h1 {
 
 #gameBoard {
     background-color: #121212;
+    display: block;
     width: 100%;
+    aspect-ratio: 1 / 1;
+    height: auto;
 }
 
 /*leaderboard*/
 #leaderboard {
     background-color: #121212;
     width: 100%;
+    max-width: 600px;
 }
 
 /*form submission*/
 .form-popup {
     display: flex;
     justify-content: center;
-    background-color: none;
-    width: 100%;
-    background-color: #121212;
+    align-items: flex-start;
     position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    padding-top: var(--form-top, 56%);
+    z-index: 2;
+}
+
+.form-popup[hidden] {
+    display: none;
 }
 
 .form-container {
-    background-color: white;
-    width: 80%;
+    width: 60%;
+    max-width: 340px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 10px;
-    border-radius: 25px;
+    gap: 2.5cqw;
 }
 
 .form-container input[type=text] {
     font-family: "Genos", sans-serif;
     font-weight: 550;
-    font-size: 25px;
+    font-size: max(16px, 4.2cqw);
+    height: max(34px, 7.5cqw);
     width: 100%;
-    border: none;
-    padding: 5px 0;
-    background: #f1f1f1;
-    height: 30px;
-    margin-bottom: 10px;
-    border-radius: 15px;
+    padding: 0;
     text-align: center;
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-radius: 15px;
 }
 
 .form-container input[type=text]:focus {
     outline: none;
-    background-color: #ddd;
+    border-color: deepskyblue;
+    background-color: rgba(255, 255, 255, 0.16);
 }
 
 .form-container input[type=text]::placeholder {
+    color: rgba(255, 255, 255, 0.55);
     text-align: center;
 }
 
 .submit-btn {
     cursor: pointer;
-    width: 30%;
+    width: 55%;
     border: none;
     background-color: deepskyblue;
     color: white;
     font-family: "Genos", sans-serif;
     font-weight: 550;
-    font-size: 25px;
-    height: 35px;
+    font-size: max(16px, 4.2cqw);
+    height: max(32px, 6.5cqw);
     border-radius: 15px;
 }
 
@@ -211,50 +176,54 @@ h1 {
 
 .leaderboard-container {
     background-color: #121212;
-    height: 350px;
-    width: 90%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    align-items: baseline;
+    column-gap: 12px;
+    row-gap: 4px;
 }
 
-.playerIDsLeaderboard {
+.playerIDsLeaderboard,
+.playerNamesLeaderboard,
+.playerScoresLeaderboard,
+.leaderboard-message {
     font-family: "Genos", sans-serif;
     font-weight: 550;
     font-size: 25px;
     background-color: #121212;
-    width: 8%;
-    display: inline-flex;
     color: white;
 }
 
 .playerNamesLeaderboard {
-    font-family: "Genos", sans-serif;
-    font-weight: 550;
-    font-size: 25px;
-    background-color: #121212;
-    width: 52%;
-    display: inline-flex;
-    color: white;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .playerScoresLeaderboard {
-    font-family: "Genos", sans-serif;
-    font-weight: 550;
-    font-size: 25px;
-    background-color: #121212;
-    display: inline-flex;
-    justify-content: flex-end;
-    width: 40%;
-    color: white;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.leaderboard-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    opacity: 0.7;
 }
 
 #lower-main-container {
     display: flex;
     justify-content: center;
     background-color: #121212;
+    width: 100%;
 }
 
 #scoreContainer {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: space-between;
+    align-items: center;
     background-color: #121212;
     width: 100%;
 }
@@ -262,22 +231,9 @@ h1 {
 /*highScore*/
 #highScoreContainer {
     background-color: #121212;
-    height: 100px;
 }
 
-#highScoreText {
-    background-color: #121212;
-    font-size: 30px;
-    font-family: "Genos", sans-serif;
-    font-weight: 550;
-    color: white;
-    display: flex;
-    justify-content: center;
-    position: relative;
-    top: 10px;
-    
-}
-
+#highScoreText,
 #highScore {
     background-color: #121212;
     font-size: 30px;
@@ -286,8 +242,6 @@ h1 {
     color: white;
     display: flex;
     justify-content: center;
-    position: relative;
-    top: 10px;
 }
 
 /*restart*/
@@ -327,21 +281,9 @@ h1 {
 /*playerScore*/
 #playerScoreContainer {
     background-color: #121212;
-    height: 100px;
 }
 
-#playerScoreText {
-    background-color: #121212;
-    font-size: 30px;
-    font-family: "Genos", sans-serif;
-    font-weight: 550;
-    color: white;
-    display: flex;
-    justify-content: center;
-    position: relative;
-    top: 10px;
-}
-
+#playerScoreText,
 #playerScore {
     background-color: #121212;
     font-size: 30px;
@@ -350,14 +292,12 @@ h1 {
     color: white;
     display: flex;
     justify-content: center;
-    position: relative;
-    top: 10px;
-    
 }
 
 /*footer*/
 footer {
     text-align: center;
+    margin-top: 40px;
     margin-bottom: 15px;
 }
 
@@ -370,18 +310,19 @@ a {
     position: relative;
     right: 2%;
     color: white;
-    transform: scale(0.75);
+    transform: scale(0.70);
 }
 
 .fa-envelope {
     color: white;
+    transform: scale(0.70);
 }
 
 .fa-github{
     position: relative;
     left: 2%;
     color: white;
-    transform: scale(0.75);
+    transform: scale(0.70);
 }
 
 @keyframes rainbow-animation {
@@ -390,10 +331,9 @@ a {
     }
 }
 
-@media (min-width: 1000px) { 
+@media (min-width: 1100px) {
     h1 {
         font-size: 180px;
-        height: 180px;   
     }
 
     #directions-header {
@@ -401,20 +341,22 @@ a {
     }
 
     .main-container {
-        flex-direction: row;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 600px) minmax(300px, 1fr);
+        align-items: start;
+        gap: 0 60px;
     }
 
-    #recent-games {
-        order: -1;
+    #gameContainer {
+        grid-column: 2;
     }
 
-    .form-popup {
-        width: 34%;
+    #leaderboard {
+        grid-column: 3;
+        max-width: 440px;
     }
 
     footer {
         margin-top: 75px;
     }
-    
-
 }
