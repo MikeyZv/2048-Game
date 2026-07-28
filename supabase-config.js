@@ -1,0 +1,4 @@
+// Supabase project credentials.
+
+export const SUPABASE_URL = "https://izbyxpgyucpevzvhoyzs.supabase.co";
+export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6Ynl4cGd5dWNwZXZ6dmhveXpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5MzA3OTAsImV4cCI6MjEwMDUwNjc5MH0.E-JS1A__n7fHeRZfmPDanZOxuzLpG7QGslCZtieJKKc";
