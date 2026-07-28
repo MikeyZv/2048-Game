@@ -29,7 +29,7 @@ body {
 
 h1 {
     text-align: center;
-    font-size: 140px;
+    font-size: 120px;
     line-height: 1;
     font-family: "Genos", sans-serif;
     background-color: #121212;
@@ -82,6 +82,7 @@ h1 {
     width: 100%;
     aspect-ratio: 1 / 1;
     height: auto;
+    border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 /*leaderboard*/
@@ -127,14 +128,12 @@ h1 {
     padding: 0;
     text-align: center;
     color: white;
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.35);
+    background-color: rgba(255, 255, 255, 0.01);
     border-radius: 15px;
 }
 
 .form-container input[type=text]:focus {
     outline: none;
-    border-color: deepskyblue;
     background-color: rgba(255, 255, 255, 0.16);
 }
 
@@ -145,7 +144,7 @@ h1 {
 
 .submit-btn {
     cursor: pointer;
-    width: 55%;
+    width: 40%;
     border: none;
     background-color: deepskyblue;
     color: white;
@@ -160,6 +159,9 @@ h1 {
     opacity: 0.7;
 }
 
+/* The leaderboard is an open list floating on the page background: no box, no
+   dividers — just the rainbow header over quiet rank numbers, names, and
+   right-aligned scores. */
 #leaderboard-header {
     display: flex;
     justify-content: center;
@@ -172,16 +174,20 @@ h1 {
     background-clip: text;
     color: transparent;
     width: 100%;
+    margin-bottom: 10px;
 }
 
 .leaderboard-container {
-    background-color: #121212;
     width: 100%;
-    display: grid;
-    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.leaderboard-row {
+    display: flex;
     align-items: baseline;
-    column-gap: 12px;
-    row-gap: 4px;
+    gap: 14px;
 }
 
 .playerIDsLeaderboard,
@@ -191,11 +197,20 @@ h1 {
     font-family: "Genos", sans-serif;
     font-weight: 550;
     font-size: 25px;
-    background-color: #121212;
     color: white;
 }
 
+/* Ranks recede so the names carry the list. */
+.playerIDsLeaderboard {
+    flex: none;
+    width: 2rem;
+    font-size: 21px;
+    color: rgba(255, 255, 255, 0.45);
+    font-variant-numeric: tabular-nums;
+}
+
 .playerNamesLeaderboard {
+    flex: 1;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -208,90 +223,98 @@ h1 {
 }
 
 .leaderboard-message {
-    grid-column: 1 / -1;
     text-align: center;
     opacity: 0.7;
 }
 
+/* Below the board: two stat tiles (Best, Score) flanking the Restart button.
+   The tiles borrow the username form's translucent-card look so the page's
+   chrome reads as one family, and everything scales off the board via cqw. */
 #lower-main-container {
     display: flex;
     justify-content: center;
-    background-color: #121212;
     width: 100%;
+    margin-top: 14px;
 }
 
 #scoreContainer {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    background-color: #121212;
+    align-items: stretch;
+    gap: 12px;
     width: 100%;
 }
 
-/*highScore*/
-#highScoreContainer {
-    background-color: #121212;
+#highScoreContainer,
+#playerScoreContainer {
+    flex: 1;
+    max-width: 170px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 12px 9px;
+    border-radius: 15px;
 }
 
 #highScoreText,
-#highScore {
-    background-color: #121212;
-    font-size: 30px;
+#playerScoreText {
     font-family: "Genos", sans-serif;
     font-weight: 550;
-    color: white;
-    display: flex;
-    justify-content: center;
+    font-size: 16px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
 }
 
-/*restart*/
+#highScore,
+#playerScore {
+    font-family: "Genos", sans-serif;
+    font-weight: 600;
+    font-size: 34px;
+    line-height: 1.05;
+    color: white;
+    /* Fixed-width digits: a score ticking up mid-game must not jitter. */
+    font-variant-numeric: tabular-nums;
+}
+
 #middle-score-container {
-    background-color: #121212;
     display: flex;
     align-items: center;
-}
-
-#restartContainer {
-    background-color: #121212;
-    display: flex;
-    justify-content: center;
-    height: 50px;
 }
 
 #restartBtn {
-    position: relative;
-    font-size: 25px;
     cursor: pointer;
     font-family: "Genos", sans-serif;
     font-weight: 550;
-    border: none;
-    background-color: deepskyblue;
+    font-size: 18px;
+    letter-spacing: 1px;
     color: white;
-    padding: 15px;
-    border-radius: 25px;
-    display: flex;
-    align-items: center;
+    background-color: deepskyblue;
+    border: none;
+    border-radius: 999px;
+    padding: 10px max(18px, 5cqw);
+    transition: filter 0.15s ease, transform 0.06s ease;
 }
 
 #restartBtn:hover {
-    opacity: 0.7;
+    filter: brightness(1.12);
 }
 
-
-/*playerScore*/
-#playerScoreContainer {
-    background-color: #121212;
+#restartBtn:active {
+    transform: scale(0.96);
+    filter: brightness(0.95);
 }
 
-#playerScoreText,
-#playerScore {
-    background-color: #121212;
-    font-size: 30px;
-    font-family: "Genos", sans-serif;
-    font-weight: 550;
-    color: white;
-    display: flex;
-    justify-content: center;
+#restartBtn:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 3px;
+}
+
+@keyframes rainbow-animation {
+    to {
+        background-position: 4500vh;
+    }
 }
 
 /*footer*/
@@ -306,29 +329,9 @@ a {
     background-color: #121212;
 }
 
-.fa-linkedin {
-    position: relative;
-    right: 2%;
+.fa-github {
     color: white;
     transform: scale(0.70);
-}
-
-.fa-envelope {
-    color: white;
-    transform: scale(0.70);
-}
-
-.fa-github{
-    position: relative;
-    left: 2%;
-    color: white;
-    transform: scale(0.70);
-}
-
-@keyframes rainbow-animation {
-    to {
-        background-position: 4500vh;
-    }
 }
 
 @media (min-width: 1100px) {
@@ -357,6 +360,6 @@ a {
     }
 
     footer {
-        margin-top: 75px;
+        margin-top: 100px;
     }
 }

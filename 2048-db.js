@@ -47,9 +47,14 @@ async function loadLeaderboard() {
 
     const rows = document.createDocumentFragment();
     data.forEach((row, index) => {
-        appendCell(rows, "playerIDsLeaderboard", index + 1);
-        appendCell(rows, "playerNamesLeaderboard", row.username);
-        appendCell(rows, "playerScoresLeaderboard", row.score);
+        // Each entry is one row element so the stylesheet can give it a
+        // divider and a hover state. Rank is position in the sorted list.
+        const entry = document.createElement("div");
+        entry.className = "leaderboard-row";
+        appendCell(entry, "playerIDsLeaderboard", index + 1);
+        appendCell(entry, "playerNamesLeaderboard", row.username);
+        appendCell(entry, "playerScoresLeaderboard", row.score);
+        rows.appendChild(entry);
     });
     leaderboardContainer.replaceChildren(rows);
 }
